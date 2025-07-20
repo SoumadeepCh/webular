@@ -1,34 +1,172 @@
 "use client";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, User, TrendingUp, Star, BookOpen, Target } from "lucide-react";
+import {
+	Clock,
+	User,
+	TrendingUp,
+	Star,
+	BookOpen,
+	Target,
+	Search,
+	Filter,
+	Lightbulb,
+	Code,
+	ChevronRight,
+	Zap,
+	Trophy,
+} from "lucide-react";
 
 interface Question {
 	_id: string;
 	title: string;
 	description: string;
 	difficulty: string;
+	tags?: string[];
+	estimatedTime?: number;
+	cssProperties?: string[];
 }
 
-export default function CssQuestionsPage() {
-	const [questions, setQuestions] = useState<Question[]>([]);
+// Mock data for demonstration
+const mockQuestions: Question[] = [
+	{
+		_id: "1",
+		title: "Responsive Grid Layout with CSS Grid",
+		description:
+			"Create a responsive grid layout that adapts to different screen sizes using CSS Grid properties.",
+		difficulty: "medium",
+		tags: ["grid", "responsive", "layout"],
+		estimatedTime: 15,
+		cssProperties: [
+			"display: grid",
+			"grid-template-columns",
+			"grid-gap",
+			"grid-auto-rows",
+		],
+	},
+	{
+		_id: "2",
+		title: "Animated Loading Spinner",
+		description:
+			"Design a smooth, rotating loading spinner using CSS animations and keyframes.",
+		difficulty: "easy",
+		tags: ["animation", "keyframes", "spinner"],
+		estimatedTime: 10,
+		cssProperties: [
+			"@keyframes",
+			"animation",
+			"transform: rotate",
+			"border-radius",
+		],
+	},
+	{
+		_id: "3",
+		title: "Complex Flexbox Navigation",
+		description:
+			"Build a complex navigation bar with dropdown menus using advanced Flexbox techniques.",
+		difficulty: "hard",
+		tags: ["flexbox", "navigation", "dropdown"],
+		estimatedTime: 25,
+		cssProperties: [
+			"display: flex",
+			"justify-content",
+			"align-items",
+			"position: absolute",
+		],
+	},
+	{
+		_id: "4",
+		title: "Custom CSS Variables Theme",
+		description:
+			"Implement a dark/light theme system using CSS custom properties and JavaScript.",
+		difficulty: "medium",
+		tags: ["variables", "theme", "custom-properties"],
+		estimatedTime: 20,
+		cssProperties: ["--custom-property", "var()", ":root", "calc()"],
+	},
+];
+
+export default function EnhancedCssQuestionsPage() {
+	const [questions, setQuestions] = useState<Question[]>(mockQuestions);
+	const [filteredQuestions, setFilteredQuestions] =
+		useState<Question[]>(mockQuestions);
 	const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+	const [searchTerm, setSearchTerm] = useState("");
+	const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
+	const [showSuggestions, setShowSuggestions] = useState(false);
+	const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+		null
+	);
+
+	// CSS property suggestions based on difficulty
+	const getCssSuggestions = (difficulty: string) => {
+		const suggestions: { [key in "easy" | "medium" | "hard"]: string[] } = {
+			easy: [
+				"color",
+				"background-color",
+				"font-size",
+				"margin",
+				"padding",
+				"border",
+				"border-radius",
+				"text-align",
+				"width",
+				"height",
+			],
+			medium: [
+				"display: flex",
+				"justify-content",
+				"align-items",
+				"grid-template-columns",
+				"transform",
+				"transition",
+				"position",
+				"z-index",
+				"box-shadow",
+				"opacity",
+			],
+			hard: [
+				"@keyframes",
+				"animation",
+				"transform: matrix3d",
+				"clip-path",
+				"filter",
+				"backdrop-filter",
+				"custom properties",
+				"calc()",
+				"clamp()",
+				"min/max",
+			],
+		};
+		const key = difficulty.toLowerCase() as "easy" | "medium" | "hard";
+		return suggestions[key] || suggestions.easy;
+	};
 
 	useEffect(() => {
-		const fetchQuestions = async () => {
-			try {
-				const res = await fetch("http://localhost:5000/questions/css");
-				const data = await res.json();
-				setQuestions(data);
-			} catch (error) {
-				console.error("Error fetching questions:", error);
-			}
-		};
+		let filtered = questions;
 
-		fetchQuestions();
-	}, []);
+		if (searchTerm) {
+			filtered = filtered.filter(
+				(q) =>
+					q.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					q.description
+						.toLowerCase()
+						.includes(searchTerm.toLowerCase()) ||
+					q.tags?.some((tag) =>
+						tag.toLowerCase().includes(searchTerm.toLowerCase())
+					)
+			);
+		}
+
+		if (selectedDifficulty !== "all") {
+			filtered = filtered.filter(
+				(q) => q.difficulty.toLowerCase() === selectedDifficulty
+			);
+		}
+
+		setFilteredQuestions(filtered);
+	}, [searchTerm, selectedDifficulty, questions]);
 
 	const getDifficultyColor = (difficulty: string) => {
 		switch (difficulty.toLowerCase()) {
@@ -75,7 +213,8 @@ export default function CssQuestionsPage() {
 									CSS Questions
 								</h1>
 								<p className="text-gray-600 mt-1">
-									Master CSS with curated coding challenges
+									Master CSS with curated coding challenges &
+									smart suggestions
 								</p>
 							</div>
 						</div>
@@ -84,149 +223,322 @@ export default function CssQuestionsPage() {
 								<Target className="w-4 h-4 text-blue-500" />
 								<span>{questions.length} Questions</span>
 							</div>
+							<button
+								onClick={() =>
+									setShowSuggestions(!showSuggestions)
+								}
+								className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-200">
+								<Lightbulb className="w-4 h-4" />
+								<span>CSS Helper</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Search and Filter Section */}
+			<div className="bg-white border-b border-gray-200">
+				<div className="container mx-auto px-6 py-6">
+					<div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+						<div className="flex-1 max-w-md relative">
+							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+							<input
+								type="text"
+								placeholder="Search questions, tags, or CSS properties..."
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.target.value)}
+								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+							/>
+						</div>
+
+						<div className="flex items-center space-x-4">
 							<div className="flex items-center space-x-2">
-								<TrendingUp className="w-4 h-4 text-emerald-500" />
-								<span>Premium</span>
+								<Filter className="w-4 h-4 text-gray-500" />
+								<select
+									value={selectedDifficulty}
+									onChange={(e) =>
+										setSelectedDifficulty(e.target.value)
+									}
+									className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+									<option value="all">All Levels</option>
+									<option value="easy">Easy</option>
+									<option value="medium">Medium</option>
+									<option value="hard">Hard</option>
+								</select>
+							</div>
+
+							<div className="flex items-center space-x-8">
+								<div className="flex items-center space-x-2">
+									<div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+									<span className="text-sm text-gray-600">
+										Easy
+									</span>
+									<span className="text-sm font-semibold text-emerald-600">
+										{
+											questions.filter(
+												(q) =>
+													q.difficulty.toLowerCase() ===
+													"easy"
+											).length
+										}
+									</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<div className="w-3 h-3 rounded-full bg-amber-500"></div>
+									<span className="text-sm text-gray-600">
+										Medium
+									</span>
+									<span className="text-sm font-semibold text-amber-600">
+										{
+											questions.filter(
+												(q) =>
+													q.difficulty.toLowerCase() ===
+													"medium"
+											).length
+										}
+									</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<div className="w-3 h-3 rounded-full bg-red-500"></div>
+									<span className="text-sm text-gray-600">
+										Hard
+									</span>
+									<span className="text-sm font-semibold text-red-600">
+										{
+											questions.filter(
+												(q) =>
+													q.difficulty.toLowerCase() ===
+													"hard"
+											).length
+										}
+									</span>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			{/* Stats Bar */}
-			<div className="bg-white border-b border-gray-200">
-				<div className="container mx-auto px-6 py-4">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center space-x-8">
-							<div className="flex items-center space-x-2">
-								<div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-								<span className="text-sm text-gray-600">
-									Easy
-								</span>
-								<span className="text-sm font-semibold text-emerald-600">
-									{
-										questions.filter(
-											(q) =>
-												q.difficulty.toLowerCase() ===
-												"easy"
-										).length
-									}
-								</span>
-							</div>
-							<div className="flex items-center space-x-2">
-								<div className="w-3 h-3 rounded-full bg-amber-500"></div>
-								<span className="text-sm text-gray-600">
-									Medium
-								</span>
-								<span className="text-sm font-semibold text-amber-600">
-									{
-										questions.filter(
-											(q) =>
-												q.difficulty.toLowerCase() ===
-												"medium"
-										).length
-									}
-								</span>
-							</div>
-							<div className="flex items-center space-x-2">
-								<div className="w-3 h-3 rounded-full bg-red-500"></div>
-								<span className="text-sm text-gray-600">
-									Hard
-								</span>
-								<span className="text-sm font-semibold text-red-600">
-									{
-										questions.filter(
-											(q) =>
-												q.difficulty.toLowerCase() ===
-												"hard"
-										).length
-									}
-								</span>
-							</div>
+			{/* CSS Suggestions Sidebar */}
+			{showSuggestions && (
+				<div className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300">
+					<div className="p-6 border-b border-gray-200">
+						<div className="flex items-center justify-between">
+							<h3 className="text-lg font-semibold text-gray-900">
+								CSS Helper
+							</h3>
+							<button
+								onClick={() => setShowSuggestions(false)}
+								className="text-gray-400 hover:text-gray-600">
+								×
+							</button>
 						</div>
-						<div className="flex items-center space-x-2 text-sm text-gray-500">
-							<Clock className="w-4 h-4" />
-							<span>Updated recently</span>
-						</div>
+						<p className="text-sm text-gray-600 mt-1">
+							Smart suggestions for your CSS journey
+						</p>
+					</div>
+
+					<div className="p-6 space-y-6 overflow-y-auto h-full pb-20">
+						{["easy", "medium", "hard"].map((level) => (
+							<div key={level} className="space-y-3">
+								<h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center space-x-2">
+									<div
+										className={`w-2 h-2 rounded-full ${
+											level === "easy"
+												? "bg-emerald-500"
+												: level === "medium"
+												? "bg-amber-500"
+												: "bg-red-500"
+										}`}></div>
+									<span>{level} Level Properties</span>
+								</h4>
+								<div className="grid grid-cols-1 gap-2">
+									{getCssSuggestions(level).map(
+										(property, index) => (
+											<div
+												key={index}
+												className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors duration-200 cursor-pointer group">
+												<code className="text-sm font-mono text-blue-600 group-hover:text-blue-700">
+													{property}
+												</code>
+											</div>
+										)
+									)}
+								</div>
+							</div>
+						))}
 					</div>
 				</div>
-			</div>
+			)}
 
 			{/* Questions Grid */}
 			<div className="container mx-auto px-6 py-8">
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-					{questions.map((question, index) => (
-						<Link
+					{filteredQuestions.map((question, index) => (
+						<Card
 							key={question._id}
-							href={`/questions/${question._id}`}>
-							<Card
-								className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
-									hoveredCard === question._id
-										? "ring-2 ring-blue-500 ring-opacity-50"
-										: ""
-								}`}
-								onMouseEnter={() =>
-									setHoveredCard(question._id)
-								}
-								onMouseLeave={() => setHoveredCard(null)}>
-								<CardHeader className="pb-3">
-									<div className="flex items-start justify-between">
-										<div className="flex items-center space-x-3">
-											<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">
-												{index + 1}
-											</div>
-											<div className="flex-1">
-												<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
-													{question.title}
-												</CardTitle>
-											</div>
+							className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
+								hoveredCard === question._id
+									? "ring-2 ring-blue-500 ring-opacity-50"
+									: ""
+							}`}
+							onMouseEnter={() => setHoveredCard(question._id)}
+							onMouseLeave={() => setHoveredCard(null)}
+							onClick={() => setSelectedQuestion(question)}>
+							<CardHeader className="pb-3">
+								<div className="flex items-start justify-between">
+									<div className="flex items-center space-x-3">
+										<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">
+											{index + 1}
 										</div>
-										<div className="flex items-center space-x-2 ml-4">
-											{getDifficultyIcon(
+										<div className="flex-1">
+											<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+												{question.title}
+											</CardTitle>
+										</div>
+									</div>
+									<div className="flex items-center space-x-2 ml-4">
+										{getDifficultyIcon(question.difficulty)}
+										<Badge
+											variant="secondary"
+											className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
 												question.difficulty
-											)}
-											<Badge
-												variant="secondary"
-												className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
-													question.difficulty
-												)}`}>
-												{question.difficulty}
-											</Badge>
+											)}`}>
+											{question.difficulty}
+										</Badge>
+									</div>
+								</div>
+							</CardHeader>
+
+							<CardContent className="pt-0">
+								<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
+									{question.description}
+								</p>
+
+								{/* Tags */}
+								{question.tags && (
+									<div className="flex flex-wrap gap-2 mb-4">
+										{question.tags.map((tag) => (
+											<span
+												key={tag}
+												className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+												{tag}
+											</span>
+										))}
+									</div>
+								)}
+
+								{/* CSS Properties Preview */}
+								{question.cssProperties &&
+									hoveredCard === question._id && (
+										<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+											<div className="flex items-center space-x-2 mb-2">
+												<Code className="w-4 h-4 text-blue-500" />
+												<span className="text-sm font-medium text-gray-700">
+													Key Properties
+												</span>
+											</div>
+											<div className="grid grid-cols-2 gap-2">
+												{question.cssProperties
+													.slice(0, 4)
+													.map((prop, idx) => (
+														<code
+															key={idx}
+															className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
+															{prop}
+														</code>
+													))}
+											</div>
+										</div>
+									)}
+
+								<div className="flex items-center justify-between">
+									<div className="flex items-center space-x-4 text-xs text-gray-500">
+										{question.estimatedTime && (
+											<div className="flex items-center space-x-1">
+												<Clock className="w-3 h-3" />
+												<span>
+													{question.estimatedTime} min
+												</span>
+											</div>
+										)}
+										<div className="flex items-center space-x-1">
+											<User className="w-3 h-3" />
+											<span>73% success</span>
+										</div>
+										<div className="flex items-center space-x-1">
+											<Star className="w-3 h-3" />
+											<span>4.2</span>
 										</div>
 									</div>
-								</CardHeader>
-								<CardContent className="pt-0">
-									<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
-										{question.description}
-									</p>
-									<div className="flex items-center justify-between">
-										<div className="flex items-center space-x-4 text-xs text-gray-500">
-											<div className="flex items-center space-x-1">
-												<User className="w-3 h-3" />
-												<span>Acceptance: 73%</span>
-											</div>
-											<div className="flex items-center space-x-1">
-												<Star className="w-3 h-3" />
-												<span>4.2</span>
-											</div>
-										</div>
-										<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-											<div className="text-xs text-blue-600 font-medium">
-												Solve →
-											</div>
+									<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+										<div className="text-xs text-blue-600 font-medium flex items-center space-x-1">
+											<Zap className="w-3 h-3" />
+											<span>Start Coding</span>
+											<ChevronRight className="w-3 h-3" />
 										</div>
 									</div>
-								</CardContent>
-							</Card>
-						</Link>
+								</div>
+							</CardContent>
+						</Card>
 					))}
 				</div>
 
-				{/* Premium CTA */}
-				<div className="mt-12 text-center">
-					<div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-shadow duration-200">
-						<Star className="w-4 h-4" />
-						<span>Premium Questions Available</span>
+				{/* No Results */}
+				{filteredQuestions.length === 0 && (
+					<div className="text-center py-12">
+						<div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+							<Search className="w-6 h-6 text-gray-400" />
+						</div>
+						<h3 className="text-lg font-semibold text-gray-900 mb-2">
+							No questions found
+						</h3>
+						<p className="text-gray-600">
+							Try adjusting your search terms or filters.
+						</p>
+					</div>
+				)}
+
+				{/* Quick Start Guide */}
+				<div className="mt-12 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100">
+					<div className="flex items-start space-x-4">
+						<div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
+							<Trophy className="w-6 h-6 text-white" />
+						</div>
+						<div className="flex-1">
+							<h3 className="text-xl font-semibold text-gray-900 mb-2">
+								Quick Start Guide
+							</h3>
+							<div className="grid md:grid-cols-3 gap-4 text-sm">
+								<div className="space-y-2">
+									<h4 className="font-medium text-gray-800">
+										1. Choose Your Level
+									</h4>
+									<p className="text-gray-600">
+										Start with easy questions and work your
+										way up
+									</p>
+								</div>
+								<div className="space-y-2">
+									<h4 className="font-medium text-gray-800">
+										2. Use CSS Helper
+									</h4>
+									<p className="text-gray-600">
+										Click the helper button for property
+										suggestions
+									</p>
+								</div>
+								<div className="space-y-2">
+									<h4 className="font-medium text-gray-800">
+										3. Practice Daily
+									</h4>
+									<p className="text-gray-600">
+										Solve one question daily to build
+										expertise
+									</p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
