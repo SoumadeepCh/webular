@@ -25,74 +25,64 @@ interface Question {
 	difficulty: string;
 	tags?: string[];
 	estimatedTime?: number;
-	htmlProperties?: string[];
+	mongoConcepts?: string[];
 }
 
 // Mock data for demonstration
 const mockQuestions: Question[] = [
 	{
 		_id: "1",
-		title: "Basic HTML Document Structure",
+		title: "MongoDB Document Structure",
 		description:
-			"Explain the basic structure of an HTML document, including doctype, html, head, and body tags.",
+			"Explain the basic document structure in MongoDB and how it differs from relational databases.",
 		difficulty: "easy",
-		tags: ["html", "structure", "basics"],
-		estimatedTime: 5,
-		htmlProperties: ["<!DOCTYPE html>", "<html>", "<head>", "<body>"],
+		tags: ["mongodb", "document", "nosql"],
+		estimatedTime: 8,
+		mongoConcepts: ["BSON", "collections", "embedded documents"],
 	},
 	{
 		_id: "2",
-		title: "Semantic HTML5 Elements",
+		title: "CRUD Operations in MongoDB",
 		description:
-			"Discuss the importance of semantic HTML5 elements like <header>, <nav>, <article>, <section>, and <footer>.",
+			"Demonstrate how to perform basic CRUD (Create, Read, Update, Delete) operations in MongoDB using the mongo shell or a driver.",
 		difficulty: "medium",
-		tags: ["html5", "semantic", "accessibility"],
-		estimatedTime: 10,
-		htmlProperties: ["<header>", "<nav>", "<article>", "<section>", "<footer>"],
+		tags: ["mongodb", "crud", "operations"],
+		estimatedTime: 15,
+		mongoConcepts: ["insertOne", "find", "updateOne", "deleteOne"],
 	},
 	{
 		_id: "3",
-		title: "HTML Forms and Input Types",
+		title: "MongoDB Indexing Strategies",
 		description:
-			"Describe various HTML form input types and their uses, including text, password, checkbox, radio, and submit.",
-		difficulty: "medium",
-		tags: ["forms", "input", "validation"],
-		estimatedTime: 15,
-		htmlProperties: ["<form>", "<input type='text'>", "<input type='submit'>", "<label>", "<textarea>"],
+			"Discuss different indexing strategies in MongoDB and their impact on query performance.",
+		difficulty: "hard",
+		tags: ["mongodb", "indexing", "performance", "optimization"],
+		estimatedTime: 20,
+		mongoConcepts: ["createIndex", "single field index", "compound index", "explain()"],
 	},
 	{
 		_id: "4",
-		title: "Embedding Multimedia in HTML",
+		title: "MongoDB Aggregation Framework",
 		description:
-			"Explain how to embed images, audio, and video in HTML documents using appropriate tags and attributes.",
-		difficulty: "easy",
-		tags: ["multimedia", "images", "audio", "video"],
-		estimatedTime: 10,
-		htmlProperties: ["<img>", "<audio>", "<video>", "<source>", "controls", "autoplay"],
+			"Explain the MongoDB Aggregation Framework and provide an example of a common aggregation pipeline.",
+		difficulty: "hard",
+		tags: ["mongodb", "aggregation", "pipeline"],
+		estimatedTime: 25,
+		mongoConcepts: ["$match", "$group", "$project", "$lookup"],
 	},
 	{
 		_id: "5",
-		title: "HTML Tables for Data Presentation",
+		title: "Data Modeling in MongoDB",
 		description:
-			"Demonstrate how to create well-structured HTML tables with headers, rows, and cells.",
-		difficulty: "easy",
-		tags: ["tables", "data", "structure"],
-		estimatedTime: 8,
-		htmlProperties: ["<table>", "<thead>", "<tbody>", "<tr>", "<th>", "<td>"],
-	},
-	{
-		_id: "6",
-		title: "HTML Accessibility Best Practices",
-		description:
-			"Discuss key HTML practices for improving web accessibility, such as alt text, ARIA attributes, and proper heading structure.",
-		difficulty: "hard",
-		tags: ["accessibility", "aria", "semantics"],
-		estimatedTime: 20,
-		htmlProperties: ["alt", "aria-label", "role", "tabindex", "<main>", "<h1>-<h6>"],
+			"Compare embedded and referenced data models in MongoDB, and discuss when to use each.",
+		difficulty: "medium",
+		tags: ["mongodb", "data modeling", "schema design"],
+		estimatedTime: 18,
+		mongoConcepts: ["one-to-one", "one-to-many", "many-to-many"],
 	},
 ];
 
-export default function EnhancedHtmlQuestionsPage() {
+export default function EnhancedMongodbQuestionsPage() {
 	const [questions, setQuestions] = useState<Question[]>(mockQuestions);
 	const [filteredQuestions, setFilteredQuestions] =
 		useState<Question[]>(mockQuestions);
@@ -104,49 +94,35 @@ export default function EnhancedHtmlQuestionsPage() {
 		null
 	);
 
-	// HTML property suggestions based on difficulty
-	const getHtmlSuggestions = (difficulty: string) => {
+	// MongoDB concept suggestions based on difficulty
+	const getMongoSuggestions = (difficulty: string) => {
 		const suggestions: { [key in "easy" | "medium" | "hard"]: string[] } = {
 			easy: [
-				"<div>",
-				"<span>",
-				"<p>",
-				"<a>",
-				"<img>",
-				"<h1>-<h6>",
-				"<ul>",
-				"<ol>",
-				"<li>",
-				"<br>",
-				"<hr>",
+				"db.collection.insertOne()",
+				"db.collection.find()",
+				"db.collection.updateOne()",
+				"db.collection.deleteOne()",
+				"show dbs",
+				"use dbname",
+				"show collections",
 			],
 			medium: [
-				"<form>",
-				"<input>",
-				"<textarea>",
-				"<select>",
-				"<option>",
-				"<table>",
-				"<tr>",
-				"<td>",
-				"<th>",
-				"<video>",
-				"<audio>",
-				"<source>",
+				"db.collection.aggregate()",
+				"$match",
+				"$group",
+				"$project",
+				"db.collection.createIndex()",
+				"db.collection.explain()",
+				"db.collection.bulkWrite()",
 			],
 			hard: [
-				"<header>",
-				"<nav>",
-				"<main>",
-				"<article>",
-				"<section>",
-				"<aside>",
-				"<footer>",
-				"<canvas>",
-				"<svg>",
-				"<template>",
-				"<slot>",
-				"aria-*",
+				"Replication Set",
+				"Sharding",
+				"Transactions",
+				"Change Streams",
+				"GridFS",
+				"Atlas Search",
+				"Schema Validation",
 			],
 		};
 		const key = difficulty.toLowerCase() as "easy" | "medium" | "hard";
@@ -215,15 +191,15 @@ export default function EnhancedHtmlQuestionsPage() {
 				<div className="container mx-auto px-6 py-8">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center space-x-4">
-							<div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl shadow-lg">
+							<div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl shadow-lg">
 								<BookOpen className="w-8 h-8 text-white" />
 							</div>
 							<div>
 								<h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-									HTML Questions
+									MongoDB Questions
 								</h1>
 								<p className="text-gray-600 mt-1">
-									Master HTML with curated coding challenges &
+									Master MongoDB with curated coding challenges &
 									smart suggestions
 								</p>
 							</div>
@@ -239,7 +215,7 @@ export default function EnhancedHtmlQuestionsPage() {
 								}
 								className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-200">
 								<Lightbulb className="w-4 h-4" />
-								<span>HTML Helper</span>
+								<span>MongoDB Helper</span>
 							</button>
 						</div>
 					</div>
@@ -254,7 +230,7 @@ export default function EnhancedHtmlQuestionsPage() {
 							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
 							<input
 								type="text"
-								placeholder="Search questions, tags, or HTML properties..."
+								placeholder="Search questions, tags, or MongoDB concepts..."
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
 								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
@@ -329,13 +305,13 @@ export default function EnhancedHtmlQuestionsPage() {
 				</div>
 			</div>
 
-			{/* HTML Suggestions Sidebar */}
+			{/* MongoDB Suggestions Sidebar */}
 			{showSuggestions && (
 				<div className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300">
 					<div className="p-6 border-b border-gray-200">
 						<div className="flex items-center justify-between">
 							<h3 className="text-lg font-semibold text-gray-900">
-								HTML Helper
+								MongoDB Helper
 							</h3>
 							<button
 								onClick={() => setShowSuggestions(false)}
@@ -344,7 +320,7 @@ export default function EnhancedHtmlQuestionsPage() {
 							</button>
 						</div>
 						<p className="text-sm text-gray-600 mt-1">
-							Smart suggestions for your HTML journey
+							Smart suggestions for your MongoDB journey
 						</p>
 					</div>
 
@@ -360,16 +336,16 @@ export default function EnhancedHtmlQuestionsPage() {
 												? "bg-amber-500"
 												: "bg-red-500"
 										}`}></div>
-									<span>{level} Level Properties</span>
+									<span>{level} Level Concepts</span>
 								</h4>
 								<div className="grid grid-cols-1 gap-2">
-									{getHtmlSuggestions(level).map(
-										(property, index) => (
+									{getMongoSuggestions(level).map(
+										(concept, idx) => (
 											<div
-												key={index}
+												key={idx}
 												className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors duration-200 cursor-pointer group">
 												<code className="text-sm font-mono text-blue-600 group-hover:text-blue-700">
-													{property}
+													{concept}
 												</code>
 											</div>
 										)
@@ -398,7 +374,7 @@ export default function EnhancedHtmlQuestionsPage() {
 							<CardHeader className="pb-3">
 								<div className="flex items-start justify-between">
 									<div className="flex items-center space-x-3">
-										<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white text-sm font-bold">
+										<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-bold">
 											{index + 1}
 										</div>
 										<div className="flex-1">
@@ -438,24 +414,24 @@ export default function EnhancedHtmlQuestionsPage() {
 									</div>
 								)}
 
-								{/* HTML Properties Preview */}
-								{question.htmlProperties &&
+								{/* MongoDB Concepts Preview */}
+								{question.mongoConcepts &&
 									hoveredCard === question._id && (
 										<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
 											<div className="flex items-center space-x-2 mb-2">
 												<Code className="w-4 h-4 text-blue-500" />
 												<span className="text-sm font-medium text-gray-700">
-													Key Properties
+													Key Concepts
 												</span>
 											</div>
 											<div className="grid grid-cols-2 gap-2">
-												{question.htmlProperties
+												{question.mongoConcepts
 													.slice(0, 4)
-													.map((prop, idx) => (
+													.map((concept, idx) => (
 														<code
 															key={idx}
 															className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
-															{prop}
+															{concept}
 														</code>
 													))}
 											</div>
@@ -531,10 +507,10 @@ export default function EnhancedHtmlQuestionsPage() {
 								</div>
 								<div className="space-y-2">
 									<h4 className="font-medium text-gray-800">
-										2. Use HTML Helper
+										2. Use MongoDB Helper
 									</h4>
 									<p className="text-gray-600">
-										Click the helper button for property
+										Click the helper button for concept
 										suggestions
 									</p>
 								</div>

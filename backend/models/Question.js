@@ -12,7 +12,7 @@ const questionSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['html', 'css', 'js'],
+    enum: ['html', 'css', 'js', 'sql', 'mongodb'],
   },
   difficulty: {
     type: String,

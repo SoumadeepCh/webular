@@ -242,11 +242,12 @@ export default function Home() {
 			icon: Terminal,
 			description:
 				"Work with NoSQL databases, document modeling, and MongoDB aggregation pipelines.",
-			difficulty: "Advanced",
+				difficulty: "Advanced",
 			questionCount: 56,
 			color: "from-purple-500 to-pink-500",
 		},
 	];
+	
 
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-start">
