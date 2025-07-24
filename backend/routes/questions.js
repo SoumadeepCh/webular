@@ -30,6 +30,9 @@ router.post('/', async (req, res) => {
     category: req.body.category,
     difficulty: req.body.difficulty,
     testCases: req.body.testCases,
+    image: req.body.image,
+    baseCode: req.body.baseCode,
+    answerCode: req.body.answerCode,
   });
 
   try {

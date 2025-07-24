@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,74 +29,10 @@ interface Question {
 	htmlProperties?: string[];
 }
 
-// Mock data for demonstration
-const mockQuestions: Question[] = [
-	{
-		_id: "1",
-		title: "Basic HTML Document Structure",
-		description:
-			"Explain the basic structure of an HTML document, including doctype, html, head, and body tags.",
-		difficulty: "easy",
-		tags: ["html", "structure", "basics"],
-		estimatedTime: 5,
-		htmlProperties: ["<!DOCTYPE html>", "<html>", "<head>", "<body>"],
-	},
-	{
-		_id: "2",
-		title: "Semantic HTML5 Elements",
-		description:
-			"Discuss the importance of semantic HTML5 elements like <header>, <nav>, <article>, <section>, and <footer>.",
-		difficulty: "medium",
-		tags: ["html5", "semantic", "accessibility"],
-		estimatedTime: 10,
-		htmlProperties: ["<header>", "<nav>", "<article>", "<section>", "<footer>"],
-	},
-	{
-		_id: "3",
-		title: "HTML Forms and Input Types",
-		description:
-			"Describe various HTML form input types and their uses, including text, password, checkbox, radio, and submit.",
-		difficulty: "medium",
-		tags: ["forms", "input", "validation"],
-		estimatedTime: 15,
-		htmlProperties: ["<form>", "<input type='text'>", "<input type='submit'>", "<label>", "<textarea>"],
-	},
-	{
-		_id: "4",
-		title: "Embedding Multimedia in HTML",
-		description:
-			"Explain how to embed images, audio, and video in HTML documents using appropriate tags and attributes.",
-		difficulty: "easy",
-		tags: ["multimedia", "images", "audio", "video"],
-		estimatedTime: 10,
-		htmlProperties: ["<img>", "<audio>", "<video>", "<source>", "controls", "autoplay"],
-	},
-	{
-		_id: "5",
-		title: "HTML Tables for Data Presentation",
-		description:
-			"Demonstrate how to create well-structured HTML tables with headers, rows, and cells.",
-		difficulty: "easy",
-		tags: ["tables", "data", "structure"],
-		estimatedTime: 8,
-		htmlProperties: ["<table>", "<thead>", "<tbody>", "<tr>", "<th>", "<td>"],
-	},
-	{
-		_id: "6",
-		title: "HTML Accessibility Best Practices",
-		description:
-			"Discuss key HTML practices for improving web accessibility, such as alt text, ARIA attributes, and proper heading structure.",
-		difficulty: "hard",
-		tags: ["accessibility", "aria", "semantics"],
-		estimatedTime: 20,
-		htmlProperties: ["alt", "aria-label", "role", "tabindex", "<main>", "<h1>-<h6>"],
-	},
-];
-
 export default function EnhancedHtmlQuestionsPage() {
-	const [questions, setQuestions] = useState<Question[]>(mockQuestions);
+	const [questions, setQuestions] = useState<Question[]>([]);
 	const [filteredQuestions, setFilteredQuestions] =
-		useState<Question[]>(mockQuestions);
+		useState<Question[]>([]);
 	const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
@@ -103,6 +40,21 @@ export default function EnhancedHtmlQuestionsPage() {
 	const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
 		null
 	);
+
+	useEffect(() => {
+		const fetchQuestions = async () => {
+			try {
+				const response = await fetch("http://localhost:5000/questions/html");
+				const data = await response.json();
+				setQuestions(data);
+				setFilteredQuestions(data);
+			} catch (error) {
+				console.error("Error fetching questions:", error);
+			}
+		};
+
+		fetchQuestions();
+	}, []);
 
 	// HTML property suggestions based on difficulty
 	const getHtmlSuggestions = (difficulty: string) => {
@@ -385,112 +337,112 @@ export default function EnhancedHtmlQuestionsPage() {
 			<div className="container mx-auto px-6 py-8">
 				<div className="grid grid-cols-1 gap-6">
 					{filteredQuestions.map((question, index) => (
-						<Card
-							key={question._id}
-							className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
-								hoveredCard === question._id
-									? "ring-2 ring-blue-500 ring-opacity-50"
-									: ""
-							}`}
-							onMouseEnter={() => setHoveredCard(question._id)}
-							onMouseLeave={() => setHoveredCard(null)}
-							onClick={() => setSelectedQuestion(question)}>
-							<CardHeader className="pb-3">
-								<div className="flex items-start justify-between">
-									<div className="flex items-center space-x-3">
-										<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white text-sm font-bold">
-											{index + 1}
+						<Link href={`/questions/${question._id}`} key={question._id}>
+							<Card
+								className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
+									hoveredCard === question._id
+										? "ring-2 ring-blue-500 ring-opacity-50"
+										: ""
+								}`}
+								onMouseEnter={() => setHoveredCard(question._id)}
+								onMouseLeave={() => setHoveredCard(null)}>
+								<CardHeader className="pb-3">
+									<div className="flex items-start justify-between">
+										<div className="flex items-center space-x-3">
+											<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white text-sm font-bold">
+												{index + 1}
+											</div>
+											<div className="flex-1">
+												<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+													{question.title}
+												</CardTitle>
+											</div>
 										</div>
-										<div className="flex-1">
-											<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
-												{question.title}
-											</CardTitle>
+										<div className="flex items-center space-x-2 ml-4">
+											{getDifficultyIcon(question.difficulty)}
+											<Badge
+												variant="secondary"
+												className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
+													question.difficulty
+												)}`}>
+												{question.difficulty}
+											</Badge>
 										</div>
 									</div>
-									<div className="flex items-center space-x-2 ml-4">
-										{getDifficultyIcon(question.difficulty)}
-										<Badge
-											variant="secondary"
-											className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
-												question.difficulty
-											)}`}>
-											{question.difficulty}
-										</Badge>
-									</div>
-								</div>
-							</CardHeader>
+								</CardHeader>
 
-							<CardContent className="pt-0">
-								<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
-									{question.description}
-								</p>
+								<CardContent className="pt-0">
+									<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
+										{question.description}
+									</p>
 
-								{/* Tags */}
-								{question.tags && (
-									<div className="flex flex-wrap gap-2 mb-4">
-										{question.tags.map((tag) => (
-											<span
-												key={tag}
-												className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-												{tag}
-											</span>
-										))}
-									</div>
-								)}
-
-								{/* HTML Properties Preview */}
-								{question.htmlProperties &&
-									hoveredCard === question._id && (
-										<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
-											<div className="flex items-center space-x-2 mb-2">
-												<Code className="w-4 h-4 text-blue-500" />
-												<span className="text-sm font-medium text-gray-700">
-													Key Properties
+									{/* Tags */}
+									{question.tags && (
+										<div className="flex flex-wrap gap-2 mb-4">
+											{question.tags.map((tag) => (
+												<span
+													key={tag}
+													className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+													{tag}
 												</span>
-											</div>
-											<div className="grid grid-cols-2 gap-2">
-												{question.htmlProperties
-													.slice(0, 4)
-													.map((prop, idx) => (
-														<code
-															key={idx}
-															className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
-															{prop}
-														</code>
-													))}
-											</div>
+											))}
 										</div>
 									)}
 
-								<div className="flex items-center justify-between">
-									<div className="flex items-center space-x-4 text-xs text-gray-500">
-										{question.estimatedTime && (
-											<div className="flex items-center space-x-1">
-												<Clock className="w-3 h-3" />
-												<span>
-													{question.estimatedTime} min
-												</span>
+									{/* HTML Properties Preview */}
+									{question.htmlProperties &&
+										hoveredCard === question._id && (
+											<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+												<div className="flex items-center space-x-2 mb-2">
+													<Code className="w-4 h-4 text-blue-500" />
+													<span className="text-sm font-medium text-gray-700">
+														Key Properties
+													</span>
+												</div>
+												<div className="grid grid-cols-2 gap-2">
+													{question.htmlProperties
+														.slice(0, 4)
+														.map((prop, idx) => (
+															<code
+																key={idx}
+																className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
+															{prop}
+														</code>
+													))}
+												</div>
 											</div>
 										)}
-										<div className="flex items-center space-x-1">
-											<User className="w-3 h-3" />
-											<span>73% success</span>
+
+									<div className="flex items-center justify-between">
+										<div className="flex items-center space-x-4 text-xs text-gray-500">
+											{question.estimatedTime && (
+												<div className="flex items-center space-x-1">
+													<Clock className="w-3 h-3" />
+													<span>
+														{question.estimatedTime} min
+													</span>
+												</div>
+											)}
+											<div className="flex items-center space-x-1">
+												<User className="w-3 h-3" />
+												<span>73% success</span>
+											</div>
+											<div className="flex items-center space-x-1">
+												<Star className="w-3 h-3" />
+												<span>4.2</span>
+											</div>
 										</div>
-										<div className="flex items-center space-x-1">
-											<Star className="w-3 h-3" />
-											<span>4.2</span>
+										<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+											<div className="text-xs text-blue-600 font-medium flex items-center space-x-1">
+												<Zap className="w-3 h-3" />
+												<span>Start Coding</span>
+												<ChevronRight className="w-3 h-3" />
+											</div>
 										</div>
 									</div>
-									<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-										<div className="text-xs text-blue-600 font-medium flex items-center space-x-1">
-											<Zap className="w-3 h-3" />
-											<span>Start Coding</span>
-											<ChevronRight className="w-3 h-3" />
-										</div>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
+								</CardContent>
+							</Card>
+						</Link>
 					))}
 				</div>
 

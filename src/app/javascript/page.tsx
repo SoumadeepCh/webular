@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,64 +29,10 @@ interface Question {
 	jsConcepts?: string[];
 }
 
-// Mock data for demonstration
-const mockQuestions: Question[] = [
-	{
-		_id: "1",
-		title: "Understanding JavaScript Closures",
-		description:
-			"Explain what closures are in JavaScript and provide a practical example of their use.",
-		difficulty: "medium",
-		tags: ["javascript", "closures", "scope"],
-		estimatedTime: 15,
-		jsConcepts: ["lexical environment", "function scope", "data privacy"],
-	},
-	{
-		_id: "2",
-		title: "Asynchronous JavaScript: Callbacks, Promises, Async/Await",
-		description:
-			"Compare and contrast callbacks, Promises, and async/await for handling asynchronous operations in JavaScript.",
-		difficulty: "hard",
-		tags: ["javascript", "async", "promises", "callbacks", "async/await"],
-		estimatedTime: 20,
-		jsConcepts: ["event loop", "microtasks", "error handling"],
-	},
-	{
-		_id: "3",
-		title: "Event Delegation in JavaScript",
-		description:
-			"Describe the concept of event delegation and explain its benefits with a code example.",
-		difficulty: "medium",
-		tags: ["javascript", "dom", "events", "performance"],
-		estimatedTime: 10,
-		jsConcepts: ["event bubbling", "event capturing", "target element"],
-	},
-	{
-		_id: "4",
-		title: "JavaScript 'this' Keyword",
-		description:
-			"Explain the different contexts in which the 'this' keyword behaves in JavaScript (global, object method, constructor, explicit binding, arrow functions).",
-		difficulty: "hard",
-		tags: ["javascript", "this", "context", "binding"],
-		estimatedTime: 18,
-		jsConcepts: ["call", "apply", "bind", "arrow functions"],
-	},
-	{
-		_id: "5",
-		title: "Prototypal Inheritance vs. Class-based Inheritance",
-		description:
-			"Compare prototypal inheritance with class-based inheritance in JavaScript, highlighting their differences and use cases.",
-		difficulty: "hard",
-		tags: ["javascript", "oop", "inheritance", "prototype", "classes"],
-		estimatedTime: 25,
-		jsConcepts: ["__proto__", "prototype chain", "constructor", "extends"],
-	},
-];
-
 export default function EnhancedJavascriptQuestionsPage() {
-	const [questions, setQuestions] = useState<Question[]>(mockQuestions);
+	const [questions, setQuestions] = useState<Question[]>([]);
 	const [filteredQuestions, setFilteredQuestions] =
-		useState<Question[]>(mockQuestions);
+		useState<Question[]>([]);
 	const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
@@ -93,6 +40,21 @@ export default function EnhancedJavascriptQuestionsPage() {
 	const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
 		null
 	);
+
+	useEffect(() => {
+		const fetchQuestions = async () => {
+			try {
+				const response = await fetch("http://localhost:5000/questions/js");
+				const data = await response.json();
+				setQuestions(data);
+				setFilteredQuestions(data);
+			} catch (error) {
+				console.error("Error fetching questions:", error);
+			}
+		};
+
+		fetchQuestions();
+	}, []);
 
 	// JavaScript concept suggestions based on difficulty
 	const getJsSuggestions = (difficulty: string) => {
@@ -367,112 +329,112 @@ export default function EnhancedJavascriptQuestionsPage() {
 			<div className="container mx-auto px-6 py-8">
 				<div className="grid grid-cols-1 gap-6">
 					{filteredQuestions.map((question, index) => (
-						<Card
-							key={question._id}
-							className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
-								hoveredCard === question._id
-									? "ring-2 ring-blue-500 ring-opacity-50"
-									: ""
-							}`}
-							onMouseEnter={() => setHoveredCard(question._id)}
-							onMouseLeave={() => setHoveredCard(null)}
-							onClick={() => setSelectedQuestion(question)}>
-							<CardHeader className="pb-3">
-								<div className="flex items-start justify-between">
-									<div className="flex items-center space-x-3">
-										<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-600 text-white text-sm font-bold">
-											{index + 1}
+						<Link href={`/questions/${question._id}`} key={question._id}>
+							<Card
+								className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
+									hoveredCard === question._id
+										? "ring-2 ring-blue-500 ring-opacity-50"
+										: ""
+								}`}
+								onMouseEnter={() => setHoveredCard(question._id)}
+								onMouseLeave={() => setHoveredCard(null)}>
+								<CardHeader className="pb-3">
+									<div className="flex items-start justify-between">
+										<div className="flex items-center space-x-3">
+											<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-600 text-white text-sm font-bold">
+												{index + 1}
+											</div>
+											<div className="flex-1">
+												<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+													{question.title}
+												</CardTitle>
+											</div>
 										</div>
-										<div className="flex-1">
-											<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
-												{question.title}
-											</CardTitle>
+										<div className="flex items-center space-x-2 ml-4">
+											{getDifficultyIcon(question.difficulty)}
+											<Badge
+												variant="secondary"
+												className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
+													question.difficulty
+												)}`}>
+												{question.difficulty}
+											</Badge>
 										</div>
 									</div>
-									<div className="flex items-center space-x-2 ml-4">
-										{getDifficultyIcon(question.difficulty)}
-										<Badge
-											variant="secondary"
-											className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
-												question.difficulty
-											)}`}>
-											{question.difficulty}
-										</Badge>
-									</div>
-								</div>
-							</CardHeader>
+								</CardHeader>
 
-							<CardContent className="pt-0">
-								<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
-									{question.description}
-								</p>
+								<CardContent className="pt-0">
+									<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
+										{question.description}
+									</p>
 
-								{/* Tags */}
-								{question.tags && (
-									<div className="flex flex-wrap gap-2 mb-4">
-										{question.tags.map((tag) => (
-											<span
-												key={tag}
-												className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-												{tag}
-											</span>
-										))}
-									</div>
-								)}
-
-								{/* JavaScript Concepts Preview */}
-								{question.jsConcepts &&
-									hoveredCard === question._id && (
-										<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
-											<div className="flex items-center space-x-2 mb-2">
-												<Code className="w-4 h-4 text-blue-500" />
-												<span className="text-sm font-medium text-gray-700">
-													Key Concepts
+									{/* Tags */}
+									{question.tags && (
+										<div className="flex flex-wrap gap-2 mb-4">
+											{question.tags.map((tag) => (
+												<span
+													key={tag}
+													className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+													{tag}
 												</span>
-											</div>
-											<div className="grid grid-cols-2 gap-2">
-												{question.jsConcepts
-													.slice(0, 4)
-													.map((concept, idx) => (
-														<code
-															key={idx}
-															className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
-															{concept}
-														</code>
-													))}
-											</div>
+											))}
 										</div>
 									)}
 
-								<div className="flex items-center justify-between">
-									<div className="flex items-center space-x-4 text-xs text-gray-500">
-										{question.estimatedTime && (
-											<div className="flex items-center space-x-1">
-												<Clock className="w-3 h-3" />
-												<span>
-													{question.estimatedTime} min
-												</span>
+									{/* JavaScript Concepts Preview */}
+									{question.jsConcepts &&
+										hoveredCard === question._id && (
+											<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+												<div className="flex items-center space-x-2 mb-2">
+													<Code className="w-4 h-4 text-blue-500" />
+													<span className="text-sm font-medium text-gray-700">
+														Key Concepts
+													</span>
+												</div>
+												<div className="grid grid-cols-2 gap-2">
+													{question.jsConcepts
+														.slice(0, 4)
+														.map((concept, idx) => (
+															<code
+																key={idx}
+																className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
+															{concept}
+														</code>
+													))}
+												</div>
 											</div>
 										)}
-										<div className="flex items-center space-x-1">
-											<User className="w-3 h-3" />
-											<span>73% success</span>
+
+									<div className="flex items-center justify-between">
+										<div className="flex items-center space-x-4 text-xs text-gray-500">
+											{question.estimatedTime && (
+												<div className="flex items-center space-x-1">
+													<Clock className="w-3 h-3" />
+													<span>
+														{question.estimatedTime} min
+													</span>
+												</div>
+											)}
+											<div className="flex items-center space-x-1">
+												<User className="w-3 h-3" />
+												<span>73% success</span>
+											</div>
+											<div className="flex items-center space-x-1">
+												<Star className="w-3 h-3" />
+												<span>4.2</span>
+											</div>
 										</div>
-										<div className="flex items-center space-x-1">
-											<Star className="w-3 h-3" />
-											<span>4.2</span>
+										<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+											<div className="text-xs text-blue-600 font-medium flex items-center space-x-1">
+												<Zap className="w-3 h-3" />
+												<span>Start Coding</span>
+												<ChevronRight className="w-3 h-3" />
+											</div>
 										</div>
 									</div>
-									<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-										<div className="text-xs text-blue-600 font-medium flex items-center space-x-1">
-											<Zap className="w-3 h-3" />
-											<span>Start Coding</span>
-											<ChevronRight className="w-3 h-3" />
-										</div>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
+								</CardContent>
+							</Card>
+						</Link>
 					))}
 				</div>
 

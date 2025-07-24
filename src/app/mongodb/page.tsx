@@ -1,5 +1,6 @@
-"use client";
+'use client';
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,64 +29,10 @@ interface Question {
 	mongoConcepts?: string[];
 }
 
-// Mock data for demonstration
-const mockQuestions: Question[] = [
-	{
-		_id: "1",
-		title: "MongoDB Document Structure",
-		description:
-			"Explain the basic document structure in MongoDB and how it differs from relational databases.",
-		difficulty: "easy",
-		tags: ["mongodb", "document", "nosql"],
-		estimatedTime: 8,
-		mongoConcepts: ["BSON", "collections", "embedded documents"],
-	},
-	{
-		_id: "2",
-		title: "CRUD Operations in MongoDB",
-		description:
-			"Demonstrate how to perform basic CRUD (Create, Read, Update, Delete) operations in MongoDB using the mongo shell or a driver.",
-		difficulty: "medium",
-		tags: ["mongodb", "crud", "operations"],
-		estimatedTime: 15,
-		mongoConcepts: ["insertOne", "find", "updateOne", "deleteOne"],
-	},
-	{
-		_id: "3",
-		title: "MongoDB Indexing Strategies",
-		description:
-			"Discuss different indexing strategies in MongoDB and their impact on query performance.",
-		difficulty: "hard",
-		tags: ["mongodb", "indexing", "performance", "optimization"],
-		estimatedTime: 20,
-		mongoConcepts: ["createIndex", "single field index", "compound index", "explain()"],
-	},
-	{
-		_id: "4",
-		title: "MongoDB Aggregation Framework",
-		description:
-			"Explain the MongoDB Aggregation Framework and provide an example of a common aggregation pipeline.",
-		difficulty: "hard",
-		tags: ["mongodb", "aggregation", "pipeline"],
-		estimatedTime: 25,
-		mongoConcepts: ["$match", "$group", "$project", "$lookup"],
-	},
-	{
-		_id: "5",
-		title: "Data Modeling in MongoDB",
-		description:
-			"Compare embedded and referenced data models in MongoDB, and discuss when to use each.",
-		difficulty: "medium",
-		tags: ["mongodb", "data modeling", "schema design"],
-		estimatedTime: 18,
-		mongoConcepts: ["one-to-one", "one-to-many", "many-to-many"],
-	},
-];
-
 export default function EnhancedMongodbQuestionsPage() {
-	const [questions, setQuestions] = useState<Question[]>(mockQuestions);
+	const [questions, setQuestions] = useState<Question[]>([]);
 	const [filteredQuestions, setFilteredQuestions] =
-		useState<Question[]>(mockQuestions);
+		useState<Question[]>([]);
 	const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
@@ -93,6 +40,21 @@ export default function EnhancedMongodbQuestionsPage() {
 	const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
 		null
 	);
+
+	useEffect(() => {
+		const fetchQuestions = async () => {
+			try {
+				const response = await fetch("http://localhost:5000/questions/mongodb");
+				const data = await response.json();
+				setQuestions(data);
+				setFilteredQuestions(data);
+			} catch (error) {
+				console.error("Error fetching questions:", error);
+			}
+		};
+
+		fetchQuestions();
+	}, []);
 
 	// MongoDB concept suggestions based on difficulty
 	const getMongoSuggestions = (difficulty: string) => {
@@ -199,8 +161,8 @@ export default function EnhancedMongodbQuestionsPage() {
 									MongoDB Questions
 								</h1>
 								<p className="text-gray-600 mt-1">
-									Master MongoDB with curated coding challenges &
-									smart suggestions
+									Master MongoDB with curated coding
+									challenges & smart suggestions
 								</p>
 							</div>
 						</div>
@@ -361,112 +323,119 @@ export default function EnhancedMongodbQuestionsPage() {
 			<div className="container mx-auto px-6 py-8">
 				<div className="grid grid-cols-1 gap-6">
 					{filteredQuestions.map((question, index) => (
-						<Card
-							key={question._id}
-							className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
-								hoveredCard === question._id
-									? "ring-2 ring-blue-500 ring-opacity-50"
-									: ""
-							}`}
-							onMouseEnter={() => setHoveredCard(question._id)}
-							onMouseLeave={() => setHoveredCard(null)}
-							onClick={() => setSelectedQuestion(question)}>
-							<CardHeader className="pb-3">
-								<div className="flex items-start justify-between">
-									<div className="flex items-center space-x-3">
-										<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-bold">
-											{index + 1}
-										</div>
-										<div className="flex-1">
-											<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
-												{question.title}
-											</CardTitle>
-										</div>
-									</div>
-									<div className="flex items-center space-x-2 ml-4">
-										{getDifficultyIcon(question.difficulty)}
-										<Badge
-											variant="secondary"
-											className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
+						<Link
+							href={`/questions/${question._id}`}
+							key={question._id}>
+							<Card
+								className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
+									hoveredCard === question._id
+										? "ring-2 ring-blue-500 ring-opacity-50"
+										: ""
+								}`}
+								onMouseEnter={() =>
+									setHoveredCard(question._id)
+								}
+								onMouseLeave={() => setHoveredCard(null)}>
+								<CardHeader className="pb-3">
+									<div className="flex items-start justify-between">
+										<div className="flex items-center space-x-3">
+											<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-bold">
+												{index + 1}
+											</div>
+											<div className="flex-1">
+												<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+													{question.title}
+												</CardTitle>
+											</div>
+										</div>{" "}
+										<div className="flex items-center space-x-2 ml-4">
+											{getDifficultyIcon(
 												question.difficulty
-											)}`}>
-											{question.difficulty}
-										</Badge>
+											)}
+											<Badge
+												variant="secondary"
+												className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
+													question.difficulty
+												)}`}>
+												{question.difficulty}
+											</Badge>
+										</div>
 									</div>
-								</div>
-							</CardHeader>
+								</CardHeader>
 
-							<CardContent className="pt-0">
-								<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
-									{question.description}
-								</p>
+								<CardContent className="pt-0">
+									<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
+										{question.description}
+									</p>
 
-								{/* Tags */}
-								{question.tags && (
-									<div className="flex flex-wrap gap-2 mb-4">
-										{question.tags.map((tag) => (
-											<span
-												key={tag}
-												className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-												{tag}
-											</span>
-										))}
-									</div>
-								)}
-
-								{/* MongoDB Concepts Preview */}
-								{question.mongoConcepts &&
-									hoveredCard === question._id && (
-										<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
-											<div className="flex items-center space-x-2 mb-2">
-												<Code className="w-4 h-4 text-blue-500" />
-												<span className="text-sm font-medium text-gray-700">
-													Key Concepts
+									{/* Tags */}
+									{question.tags && (
+										<div className="flex flex-wrap gap-2 mb-4">
+											{question.tags.map((tag) => (
+												<span
+													key={tag}
+													className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+													{tag}
 												</span>
-											</div>
-											<div className="grid grid-cols-2 gap-2">
-												{question.mongoConcepts
-													.slice(0, 4)
-													.map((concept, idx) => (
-														<code
-															key={idx}
-															className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
-															{concept}
-														</code>
-													))}
-											</div>
+											))}
 										</div>
 									)}
 
-								<div className="flex items-center justify-between">
-									<div className="flex items-center space-x-4 text-xs text-gray-500">
-										{question.estimatedTime && (
-											<div className="flex items-center space-x-1">
-												<Clock className="w-3 h-3" />
-												<span>
-													{question.estimatedTime} min
-												</span>
+									{/* MongoDB Concepts Preview */}
+									{question.mongoConcepts &&
+										hoveredCard === question._id && (
+											<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+												<div className="flex items-center space-x-2 mb-2">
+													<Code className="w-4 h-4 text-blue-500" />
+													<span className="text-sm font-medium text-gray-700">
+														Key Concepts
+													</span>
+												</div>
+												<div className="grid grid-cols-2 gap-2">
+													{question.mongoConcepts
+														.slice(0, 4)
+														.map((concept, idx) => (
+															<code
+																key={idx}
+																className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
+																{concept}
+															</code>
+														))}
+												</div>
 											</div>
 										)}
-										<div className="flex items-center space-x-1">
-											<User className="w-3 h-3" />
-											<span>73% success</span>
+
+									<div className="flex items-center justify-between">
+										<div className="flex items-center space-x-4 text-xs text-gray-500">
+											{question.estimatedTime && (
+												<div className="flex items-center space-x-1">
+													<Clock className="w-3 h-3" />
+													<span>
+														{question.estimatedTime}{" "}
+														min
+													</span>
+												</div>
+											)}
+											<div className="flex items-center space-x-1">
+												<User className="w-3 h-3" />
+												<span>73% success</span>
+											</div>
+											<div className="flex items-center space-x-1">
+												<Star className="w-3 h-3" />
+												<span>4.2</span>
+											</div>
 										</div>
-										<div className="flex items-center space-x-1">
-											<Star className="w-3 h-3" />
-											<span>4.2</span>
+										<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+											<div className="text-xs text-blue-600 font-medium flex items-center space-x-1">
+												<Zap className="w-3 h-3" />
+												<span>Start Coding</span>
+												<ChevronRight className="w-3 h-3" />
+											</div>
 										</div>
 									</div>
-									<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-										<div className="text-xs text-blue-600 font-medium flex items-center space-x-1">
-											<Zap className="w-3 h-3" />
-											<span>Start Coding</span>
-											<ChevronRight className="w-3 h-3" />
-										</div>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
+								</CardContent>
+							</Card>
+						</Link>
 					))}
 				</div>
 

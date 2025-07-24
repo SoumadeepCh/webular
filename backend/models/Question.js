@@ -19,6 +19,15 @@ const questionSchema = new mongoose.Schema({
     required: true,
     enum: ['easy', 'medium', 'hard'],
   },
+  image: {
+    type: String,
+  },
+  baseCode: {
+    type: String,
+  },
+  answerCode: {
+    type: String,
+  },
   testCases: [
     {
       input: String,

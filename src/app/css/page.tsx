@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,69 +29,10 @@ interface Question {
 	cssProperties?: string[];
 }
 
-// Mock data for demonstration
-const mockQuestions: Question[] = [
-	{
-		_id: "1",
-		title: "Responsive Grid Layout with CSS Grid",
-		description:
-			"Create a responsive grid layout that adapts to different screen sizes using CSS Grid properties.",
-		difficulty: "medium",
-		tags: ["grid", "responsive", "layout"],
-		estimatedTime: 15,
-		cssProperties: [
-			"display: grid",
-			"grid-template-columns",
-			"grid-gap",
-			"grid-auto-rows",
-		],
-	},
-	{
-		_id: "2",
-		title: "Animated Loading Spinner",
-		description:
-			"Design a smooth, rotating loading spinner using CSS animations and keyframes.",
-		difficulty: "easy",
-		tags: ["animation", "keyframes", "spinner"],
-		estimatedTime: 10,
-		cssProperties: [
-			"@keyframes",
-			"animation",
-			"transform: rotate",
-			"border-radius",
-		],
-	},
-	{
-		_id: "3",
-		title: "Complex Flexbox Navigation",
-		description:
-			"Build a complex navigation bar with dropdown menus using advanced Flexbox techniques.",
-		difficulty: "hard",
-		tags: ["flexbox", "navigation", "dropdown"],
-		estimatedTime: 25,
-		cssProperties: [
-			"display: flex",
-			"justify-content",
-			"align-items",
-			"position: absolute",
-		],
-	},
-	{
-		_id: "4",
-		title: "Custom CSS Variables Theme",
-		description:
-			"Implement a dark/light theme system using CSS custom properties and JavaScript.",
-		difficulty: "medium",
-		tags: ["variables", "theme", "custom-properties"],
-		estimatedTime: 20,
-		cssProperties: ["--custom-property", "var()", ":root", "calc()"],
-	},
-];
-
 export default function EnhancedCssQuestionsPage() {
-	const [questions, setQuestions] = useState<Question[]>(mockQuestions);
+	const [questions, setQuestions] = useState<Question[]>([]);
 	const [filteredQuestions, setFilteredQuestions] =
-		useState<Question[]>(mockQuestions);
+		useState<Question[]>([]);
 	const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
@@ -98,6 +40,21 @@ export default function EnhancedCssQuestionsPage() {
 	const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
 		null
 	);
+
+	useEffect(() => {
+		const fetchQuestions = async () => {
+			try {
+				const response = await fetch("http://localhost:5000/questions/css");
+				const data = await response.json();
+				setQuestions(data);
+				setFilteredQuestions(data);
+			} catch (error) {
+				console.error("Error fetching questions:", error);
+			}
+		};
+
+		fetchQuestions();
+	}, []);
 
 	// CSS property suggestions based on difficulty
 	const getCssSuggestions = (difficulty: string) => {
@@ -375,112 +332,112 @@ export default function EnhancedCssQuestionsPage() {
 			<div className="container mx-auto px-6 py-8">
 				<div className="grid grid-cols-1 gap-6">
 					{filteredQuestions.map((question, index) => (
-						<Card
-							key={question._id}
-							className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
-								hoveredCard === question._id
-									? "ring-2 ring-blue-500 ring-opacity-50"
-									: ""
-							}`}
-							onMouseEnter={() => setHoveredCard(question._id)}
-							onMouseLeave={() => setHoveredCard(null)}
-							onClick={() => setSelectedQuestion(question)}>
-							<CardHeader className="pb-3">
-								<div className="flex items-start justify-between">
-									<div className="flex items-center space-x-3">
-										<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">
-											{index + 1}
+						<Link href={`/questions/${question._id}`} key={question._id}>
+							<Card
+								className={`group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-100 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-[1.02] ${
+									hoveredCard === question._id
+										? "ring-2 ring-blue-500 ring-opacity-50"
+										: ""
+								}`}
+								onMouseEnter={() => setHoveredCard(question._id)}
+								onMouseLeave={() => setHoveredCard(null)}>
+								<CardHeader className="pb-3">
+									<div className="flex items-start justify-between">
+										<div className="flex items-center space-x-3">
+											<div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold">
+												{index + 1}
+											</div>
+											<div className="flex-1">
+												<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+													{question.title}
+												</CardTitle>
+											</div>
 										</div>
-										<div className="flex-1">
-											<CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
-												{question.title}
-											</CardTitle>
+										<div className="flex items-center space-x-2 ml-4">
+											{getDifficultyIcon(question.difficulty)}
+											<Badge
+												variant="secondary"
+												className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
+													question.difficulty
+												)}`}>
+												{question.difficulty}
+											</Badge>
 										</div>
 									</div>
-									<div className="flex items-center space-x-2 ml-4">
-										{getDifficultyIcon(question.difficulty)}
-										<Badge
-											variant="secondary"
-											className={`text-xs font-medium transition-colors duration-200 ${getDifficultyColor(
-												question.difficulty
-											)}`}>
-											{question.difficulty}
-										</Badge>
-									</div>
-								</div>
-							</CardHeader>
+								</CardHeader>
 
-							<CardContent className="pt-0">
-								<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
-									{question.description}
-								</p>
+								<CardContent className="pt-0">
+									<p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
+										{question.description}
+									</p>
 
-								{/* Tags */}
-								{question.tags && (
-									<div className="flex flex-wrap gap-2 mb-4">
-										{question.tags.map((tag) => (
-											<span
-												key={tag}
-												className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-												{tag}
-											</span>
-										))}
-									</div>
-								)}
-
-								{/* CSS Properties Preview */}
-								{question.cssProperties &&
-									hoveredCard === question._id && (
-										<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
-											<div className="flex items-center space-x-2 mb-2">
-												<Code className="w-4 h-4 text-blue-500" />
-												<span className="text-sm font-medium text-gray-700">
-													Key Properties
+									{/* Tags */}
+									{question.tags && (
+										<div className="flex flex-wrap gap-2 mb-4">
+											{question.tags.map((tag) => (
+												<span
+													key={tag}
+													className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+													{tag}
 												</span>
-											</div>
-											<div className="grid grid-cols-2 gap-2">
-												{question.cssProperties
-													.slice(0, 4)
-													.map((prop, idx) => (
-														<code
-															key={idx}
-															className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
-															{prop}
-														</code>
-													))}
-											</div>
+											))}
 										</div>
 									)}
 
-								<div className="flex items-center justify-between">
-									<div className="flex items-center space-x-4 text-xs text-gray-500">
-										{question.estimatedTime && (
-											<div className="flex items-center space-x-1">
-												<Clock className="w-3 h-3" />
-												<span>
-													{question.estimatedTime} min
-												</span>
+									{/* CSS Properties Preview */}
+									{question.cssProperties &&
+										hoveredCard === question._id && (
+											<div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+												<div className="flex items-center space-x-2 mb-2">
+													<Code className="w-4 h-4 text-blue-500" />
+													<span className="text-sm font-medium text-gray-700">
+														Key Properties
+													</span>
+												</div>
+												<div className="grid grid-cols-2 gap-2">
+													{question.cssProperties
+														.slice(0, 4)
+														.map((prop, idx) => (
+															<code
+																key={idx}
+																className="text-xs bg-white px-2 py-1 rounded border text-blue-600">
+															{prop}
+														</code>
+													))}
+												</div>
 											</div>
 										)}
-										<div className="flex items-center space-x-1">
-											<User className="w-3 h-3" />
-											<span>73% success</span>
+
+									<div className="flex items-center justify-between">
+										<div className="flex items-center space-x-4 text-xs text-gray-500">
+											{question.estimatedTime && (
+												<div className="flex items-center space-x-1">
+													<Clock className="w-3 h-3" />
+													<span>
+														{question.estimatedTime} min
+													</span>
+												</div>
+											)}
+											<div className="flex items-center space-x-1">
+												<User className="w-3 h-3" />
+												<span>73% success</span>
+											</div>
+											<div className="flex items-center space-x-1">
+												<Star className="w-3 h-3" />
+												<span>4.2</span>
+											</div>
 										</div>
-										<div className="flex items-center space-x-1">
-											<Star className="w-3 h-3" />
-											<span>4.2</span>
+										<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+											<div className="text-xs text-blue-600 font-medium flex items-center space-x-1">
+												<Zap className="w-3 h-3" />
+												<span>Start Coding</span>
+												<ChevronRight className="w-3 h-3" />
+											</div>
 										</div>
 									</div>
-									<div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-										<div className="text-xs text-blue-600 font-medium flex items-center space-x-1">
-											<Zap className="w-3 h-3" />
-											<span>Start Coding</span>
-											<ChevronRight className="w-3 h-3" />
-										</div>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
+								</CardContent>
+							</Card>
+						</Link>
 					))}
 				</div>
 
