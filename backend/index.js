@@ -21,6 +21,9 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
 const questionsRouter = require('./routes/questions');
 app.use('/questions', questionsRouter);
 
+const aiRouter = require('./routes/questions');
+app.use('/questions/api/analyze', aiRouter);
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });

@@ -56,4 +56,24 @@ router.get('/id/:id', async (req, res) => {
   }
 });
 
+router.post('/api/analyze', async (req, res) => {
+  const { title, description, code } = req.body;
+
+  try {
+    const question = await Question.findOne({ title, description });
+
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    if (code === question.answerCode) {
+      res.json({ analysis: 'Correct' });
+    } else {
+      res.json({ analysis: 'Incorrect' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error analyzing code' });
+  }
+});
+
 module.exports = router;

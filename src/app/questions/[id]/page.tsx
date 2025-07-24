@@ -27,6 +27,7 @@ import {
 	Minimize,
 	Eye,
 	EyeOff,
+	Sparkles,
 } from "lucide-react";
 
 interface Question {
@@ -34,6 +35,8 @@ interface Question {
 	title: string;
 	description: string;
 	difficulty?: string;
+	baseCode?: string;
+	category?: string;
 }
 
 interface EditorSettings {
@@ -82,6 +85,9 @@ export default function QuestionPage() {
 
 	const [errors, setErrors] = useState<string[]>([]);
 	const [isEditorReady, setIsEditorReady] = useState(false);
+	const [aiFeedback, setAiFeedback] = useState<string | null>(null);
+	const [isAiLoading, setIsAiLoading] = useState(false);
+	const [language, setLanguage] = useState("css");
 	const editorRef = useRef<any>(null);
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const params = useParams();
@@ -114,6 +120,12 @@ export default function QuestionPage() {
 					);
 					const data = await res.json();
 					setQuestion(data);
+					if (data.baseCode) {
+						setCode(data.baseCode);
+					}
+					if (data.category) {
+						setLanguage(data.category);
+					}
 				} catch (error) {
 					console.error("Error fetching question:", error);
 				}
@@ -126,106 +138,13 @@ export default function QuestionPage() {
 	const handleEditorDidMount = (editor: any, monaco: any) => {
 		editorRef.current = editor;
 		setIsEditorReady(true);
-
-		// Enhanced CSS validation
-		monaco.languages.css.cssDefaults.setOptions({
-			validate: true,
-			lint: {
-				unknownProperties: "warning",
-				unknownVendorSpecificProperties: "ignore",
-				duplicateProperties: "warning",
-				emptyRules: "warning",
-				importStatement: "ignore",
-				boxModel: "ignore",
-				universalSelector: "ignore",
-				zeroUnits: "ignore",
-				fontFaceProperties: "warning",
-				hexColorLength: "error",
-				argumentsInColorFunction: "error",
-				unknownAtRules: "warning",
-				ieHack: "ignore",
-			},
-		});
-
-		// Auto-formatting
-		editor.addAction({
-			id: "format-css",
-			label: "Format CSS",
-			keybindings: [
-				monaco.KeyMod.CtrlCmd |
-					monaco.KeyMod.Shift |
-					monaco.KeyCode.KeyF,
-			],
-			run: () => {
-				editor.getAction("editor.action.formatDocument").run();
-			},
-		});
-
-		// Custom CSS snippets
-		monaco.languages.registerCompletionItemProvider("css", {
-			provideCompletionItems: (model: any, position: any) => {
-				const suggestions = [
-					{
-						label: "flexcenter",
-						kind: monaco.languages.CompletionItemKind.Snippet,
-						insertText: [
-							"display: flex;",
-							"justify-content: center;",
-							"align-items: center;",
-						].join("\n"),
-						insertTextRules:
-							monaco.languages.CompletionItemInsertTextRule
-								.InsertAsSnippet,
-						documentation: "Flex center layout",
-					},
-					{
-						label: "gridcenter",
-						kind: monaco.languages.CompletionItemKind.Snippet,
-						insertText: [
-							"display: grid;",
-							"place-items: center;",
-						].join("\n"),
-						insertTextRules:
-							monaco.languages.CompletionItemInsertTextRule
-								.InsertAsSnippet,
-						documentation: "Grid center layout",
-					},
-					{
-						label: "transition",
-						kind: monaco.languages.CompletionItemKind.Snippet,
-						insertText: "transition: all 0.3s ease;",
-						documentation: "Basic transition",
-					},
-				];
-				return { suggestions };
-			},
-		});
-
-		// Error handling
-		monaco.editor.onDidChangeMarkers(() => {
-			const markers = monaco.editor.getModelMarkers({
-				resource: editor.getModel().uri,
-			});
-			const newErrors = markers.map(
-				(marker: any) =>
-					`Line ${marker.startLineNumber}: ${marker.message}`
-			);
-			setErrors(newErrors);
-		});
-
-		// Keyboard shortcuts
-		editor.addCommand(
-			monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-			runCode
-		);
-		editor.addCommand(
-			monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyR,
-			resetCode
-		);
 	};
+
+	
 
 	const runCode = useCallback(async () => {
 		setIsRunning(true);
+		setAiFeedback(null);
 		await new Promise((resolve) => setTimeout(resolve, 300));
 
 		if (iframeRef.current) {
@@ -261,8 +180,38 @@ export default function QuestionPage() {
 				document.close();
 			}
 		}
+
+		if (question) {
+			setIsAiLoading(true);
+			try {
+				const res = await fetch(
+					"http://localhost:5000/questions/api/analyze",
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							title: question.title,
+							description: question.description,
+							code,
+						}),
+					}
+				);
+				const data = await res.json();
+				setAiFeedback(data.analysis);
+			} catch (error) {
+				console.error("Error getting AI feedback:", error);
+				setAiFeedback(
+					"An error occurred while analyzing the code."
+				);
+			} finally {
+				setIsAiLoading(false);
+			}
+		}
+
 		setIsRunning(false);
-	}, [code]);
+	}, [code, question]);
 
 	const resetCode = () => {
 		const defaultCode = `/* Write your CSS here */
@@ -478,7 +427,7 @@ export default function QuestionPage() {
 								<div className="flex items-center justify-between flex-wrap gap-2">
 									<div className="flex items-center space-x-4">
 										<h3 className="font-semibold text-gray-900">
-											CSS Editor
+											{language.toUpperCase()} Editor
 										</h3>
 										{errors.length > 0 && (
 											<span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
@@ -651,23 +600,7 @@ export default function QuestionPage() {
 									</div>
 								)}
 
-								{/* Error Display */}
-								{errors.length > 0 && (
-									<div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-										<div className="text-sm text-red-800">
-											<strong>CSS Errors:</strong>
-											<ul className="mt-1 space-y-1">
-												{errors.map((error, index) => (
-													<li
-														key={index}
-														className="text-xs">
-														• {error}
-													</li>
-												))}
-											</ul>
-										</div>
-									</div>
-								)}
+								
 							</div>
 
 				<div
@@ -675,13 +608,11 @@ export default function QuestionPage() {
 					style={{ minHeight: isFullscreen ? "500px" : "400px", height: isFullscreen ? "500px" : "400px" }}>
 					<Editor
 						height={isFullscreen ? "500px" : "400px"}
-									language="css"
-									value={code}
-									onChange={(value) => setCode(value || "")}
-									onMount={handleEditorDidMount}
-									theme={
-										theme === "dark" ? "vs-dark" : "light"
-									}
+						language={language}
+						value={code}
+						onChange={(value) => setCode(value || "")}
+						onMount={handleEditorDidMount}
+						theme={theme === "dark" ? "vs-dark" : "light"}
 									options={{
 										minimap: {
 											enabled: editorSettings.minimap,
@@ -795,12 +726,17 @@ export default function QuestionPage() {
 									onClick={runCode}
 									disabled={isRunning}
 									className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-										isRunning
+										isRunning || isAiLoading
 											? "bg-gray-100 text-gray-400 cursor-not-allowed"
 											: "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl"
 									}`}
 									title="Run Code (Ctrl+Enter)">
-									{isRunning ? (
+									{isAiLoading ? (
+										<>
+											<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+											<span>Analyzing...</span>
+										</>
+									) : isRunning ? (
 										<>
 											<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
 											<span>Running...</span>
@@ -818,6 +754,7 @@ export default function QuestionPage() {
 										Submit
 									</span>
 								</button>
+								
 							</div>
 
 							<div className="flex items-center space-x-4 text-sm text-gray-500">
@@ -840,6 +777,15 @@ export default function QuestionPage() {
 									<span>Auto-saved</span>
 								</div>
 							</div>
+						</div>
+					</div>
+				)}
+
+				{aiFeedback && (
+					<div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+						<h3 className="text-lg font-semibold text-gray-900 mb-2">AI Feedback</h3>
+						<div className="prose prose-sm max-w-none text-gray-700">
+							{aiFeedback}
 						</div>
 					</div>
 				)}
