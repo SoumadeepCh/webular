@@ -44,7 +44,7 @@ export default function EnhancedJavascriptQuestionsPage() {
 	useEffect(() => {
 		const fetchQuestions = async () => {
 			try {
-				const response = await fetch("http://localhost:5000/questions/js");
+				const response = await fetch("/api/questions?category=js");
 				const data = await response.json();
 				setQuestions(data);
 				setFilteredQuestions(data);

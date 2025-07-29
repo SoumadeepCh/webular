@@ -44,7 +44,7 @@ export default function EnhancedHtmlQuestionsPage() {
 	useEffect(() => {
 		const fetchQuestions = async () => {
 			try {
-				const response = await fetch("http://localhost:5000/questions/html");
+				const response = await fetch("/api/questions?category=html");
 				const data = await response.json();
 				setQuestions(data);
 				setFilteredQuestions(data);

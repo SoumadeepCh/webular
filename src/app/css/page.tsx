@@ -44,7 +44,7 @@ export default function EnhancedCssQuestionsPage() {
 	useEffect(() => {
 		const fetchQuestions = async () => {
 			try {
-				const response = await fetch("http://localhost:5000/questions/css");
+				const response = await fetch("/api/questions?category=css");
 				const data = await response.json();
 				setQuestions(data);
 				setFilteredQuestions(data);

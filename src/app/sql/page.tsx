@@ -44,7 +44,7 @@ export default function EnhancedSqlQuestionsPage() {
 	useEffect(() => {
 		const fetchQuestions = async () => {
 			try {
-				const response = await fetch("http://localhost:5000/questions/sql");
+				const response = await fetch("/api/questions?category=sql");
 				const data = await response.json();
 				setQuestions(data);
 				setFilteredQuestions(data);
