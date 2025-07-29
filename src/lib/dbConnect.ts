@@ -1,5 +1,5 @@
 
-import mongoose from 'mongoose';
+import mongoose, { Mongoose } from 'mongoose';
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -30,6 +30,10 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
+    if (!MONGO_URI) {
+      throw new Error('MONGO_URI is not defined');
+    }
+
     cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
       return mongoose;
     });
@@ -41,8 +45,8 @@ async function dbConnect() {
 // Augment the NodeJS global type with the mongoose property
 declare global {
   var mongoose: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
+    conn: Mongoose | null;
+    promise: Promise<Mongoose> | null;
   };
 }
 
