@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
+import { ModeToggle } from "@/components/ModeToggle";
 
 export default function Header() {
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
+    <header className="bg-background shadow-sm border-b border-border">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-4">
@@ -14,6 +15,7 @@ export default function Header() {
               Webular
             </h1>
           </Link>
+          <ModeToggle />
         </div>
       </div>
     </header>

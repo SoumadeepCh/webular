@@ -115,9 +115,7 @@ export default function QuestionPage() {
 		if (id) {
 			const fetchQuestion = async () => {
 				try {
-					const res = await fetch(
-						`http://localhost:5000/questions/id/${id}`
-					);
+					const res = await fetch(`/api/questions/${id}`);
 					const data = await res.json();
 					setQuestion(data);
 					if (data.baseCode) {

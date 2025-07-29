@@ -28,7 +28,7 @@ const HeroSection = () => {
 	}, []);
 
 	return (
-		<section className="relative w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
+		<section className="relative w-full min-h-screen bg-background overflow-hidden">
 			{/* Background Elements */}
 			<div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 			<div className="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
@@ -51,7 +51,7 @@ const HeroSection = () => {
 					</div>
 
 					<h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-						<span className="bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
+						<span className="bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent dark:from-gray-100 dark:via-blue-200 dark:to-purple-200">
 							Master Web
 						</span>
 						<br />
@@ -60,7 +60,7 @@ const HeroSection = () => {
 						</span>
 					</h1>
 
-					<p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+					<p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
 						Level up your coding skills with our interactive
 						challenges, real-world projects, and expert-crafted
 						problems.
@@ -71,39 +71,39 @@ const HeroSection = () => {
 							<span>Start Learning</span>
 							<ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
 						</button>
-						<button className="group bg-white/80 backdrop-blur-sm hover:bg-white text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 border border-white/20 flex items-center space-x-2">
+						<button className="group bg-white/80 backdrop-blur-sm hover:bg-white text-gray-700 dark:bg-gray-800/80 dark:hover:bg-gray-800 dark:text-gray-200 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 border border-white/20 dark:border-gray-700/50 flex items-center space-x-2">
 							<BookOpen className="w-5 h-5" />
 							<span>Browse Topics</span>
 						</button>
 					</div>
 
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-						<div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
+						<div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 dark:bg-gray-800/60 dark:border-gray-700/50">
 							<div className="flex items-center space-x-3 mb-2">
 								<Users className="w-6 h-6 text-blue-500" />
-								<span className="text-2xl font-bold text-gray-900">
+								<span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 									50K+
 								</span>
 							</div>
-							<p className="text-gray-600">Active Learners</p>
+							<p className="text-gray-600 dark:text-gray-400">Active Learners</p>
 						</div>
-						<div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
+						<div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 dark:bg-gray-800/60 dark:border-gray-700/50">
 							<div className="flex items-center space-x-3 mb-2">
 								<Target className="w-6 h-6 text-emerald-500" />
-								<span className="text-2xl font-bold text-gray-900">
+								<span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 									500+
 								</span>
 							</div>
-							<p className="text-gray-600">Coding Challenges</p>
+							<p className="text-gray-600 dark:text-gray-400">Coding Challenges</p>
 						</div>
-						<div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
+						<div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 dark:bg-gray-800/60 dark:border-gray-700/50">
 							<div className="flex items-center space-x-3 mb-2">
 								<Award className="w-6 h-6 text-purple-500" />
-								<span className="text-2xl font-bold text-gray-900">
+								<span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
 									95%
 								</span>
 							</div>
-							<p className="text-gray-600">Success Rate</p>
+							<p className="text-gray-600 dark:text-gray-400">Success Rate</p>
 						</div>
 					</div>
 				</div>
@@ -186,16 +186,7 @@ const TopicCard = ({
 };
 
 export default function Home() {
-	const [currentTime, setCurrentTime] = useState(new Date());
-
-	useEffect(() => {
-		const timer = setInterval(() => {
-			setCurrentTime(new Date());
-		}, 1000);
-		return () => clearInterval(timer);
-	}, []);
-
-	const topics = [
+	const [topics, setTopics] = useState([
 		{
 			title: "HTML",
 			href: "/html",
@@ -203,8 +194,9 @@ export default function Home() {
 			description:
 				"Master the foundation of web development with semantic HTML and modern best practices.",
 			difficulty: "Beginner",
-			questionCount: 45,
+			questionCount: 0,
 			color: "from-orange-500 to-red-500",
+			loading: true,
 		},
 		{
 			title: "CSS",
@@ -213,8 +205,9 @@ export default function Home() {
 			description:
 				"Create beautiful, responsive designs with CSS Grid, Flexbox, and advanced styling techniques.",
 			difficulty: "Intermediate",
-			questionCount: 67,
+			questionCount: 0,
 			color: "from-blue-500 to-indigo-500",
+			loading: true,
 		},
 		{
 			title: "JavaScript",
@@ -223,8 +216,9 @@ export default function Home() {
 			description:
 				"Build interactive web applications with modern JavaScript ES6+ features and frameworks.",
 			difficulty: "Advanced",
-			questionCount: 128,
+			questionCount: 0,
 			color: "from-yellow-500 to-orange-500",
+			loading: true,
 		},
 		{
 			title: "SQL",
@@ -233,8 +227,9 @@ export default function Home() {
 			description:
 				"Query and manipulate databases efficiently with SQL joins, aggregations, and optimization.",
 			difficulty: "Intermediate",
-			questionCount: 89,
+			questionCount: 0,
 			color: "from-green-500 to-emerald-500",
+			loading: true,
 		},
 		{
 			title: "MongoDB",
@@ -242,11 +237,27 @@ export default function Home() {
 			icon: Terminal,
 			description:
 				"Work with NoSQL databases, document modeling, and MongoDB aggregation pipelines.",
-				difficulty: "Advanced",
-			questionCount: 56,
+			difficulty: "Advanced",
+			questionCount: 0,
 			color: "from-purple-500 to-pink-500",
+			loading: true,
 		},
-	];
+	]);
+
+	useEffect(() => {
+		const fetchQuestionCounts = async () => {
+			const updatedTopics = await Promise.all(
+				topics.map(async (topic) => {
+					const response = await fetch(`/api/questions?category=${topic.title.toLowerCase()}`);
+					const questions = await response.json();
+					return { ...topic, questionCount: questions.length, loading: false };
+				})
+			);
+			setTopics(updatedTopics);
+		};
+
+		fetchQuestionCounts();
+	}, []);
 	
 
 	return (
@@ -256,7 +267,7 @@ export default function Home() {
 			{/* Topics Section */}
 			<section
 				id="topics"
-				className="w-full py-16 md:py-24 lg:py-32 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+				className="w-full py-16 md:py-24 lg:py-32 bg-background">
 				<div className="container mx-auto px-6">
 					<div className="text-center mb-16">
 						<div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 mb-6 shadow-lg border border-white/20">
