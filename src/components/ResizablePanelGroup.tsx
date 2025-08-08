@@ -24,13 +24,7 @@ export default function ResizablePanelGroup({
 
 					return (
 						<React.Fragment key={index}>
-							{cloneElement(element, {
-								...element.props,
-								style: {
-									...(element.props.style || {}),
-									flex: 1,
-								},
-							})}
+							
 							{index < Children.count(children) - 1 && (
 								<motion.div
 									drag="x"
