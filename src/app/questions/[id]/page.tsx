@@ -1,8 +1,10 @@
 "use client";
 
+import ResizablePanelGroup from "@/components/ResizablePanelGroup";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
-import Editor from "@monaco-editor/react";
+import CodeEditor from "@/components/CodeEditor";
+
 import {
 	Play,
 	RotateCcw,
@@ -51,6 +53,7 @@ interface EditorSettings {
 }
 
 export default function QuestionPage() {
+	const [activeTab, setActiveTab] = useState("preview");
 	const [question, setQuestion] = useState<Question | null>(null);
 	const [code, setCode] = useState(`/* Write your CSS here */
 
@@ -71,7 +74,7 @@ export default function QuestionPage() {
 	const [theme, setTheme] = useState<"light" | "dark">("dark");
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const [showSettings, setShowSettings] = useState(false);
-	const [showPreview, setShowPreview] = useState(true);
+	 
 	const [editorSettings, setEditorSettings] = useState<EditorSettings>({
 		fontSize: 14,
 		tabSize: 2,
@@ -316,15 +319,10 @@ export default function QuestionPage() {
 		);
 	}
 
-	const editorLayout = isFullscreen ? "fixed inset-0 z-50 bg-white" : "";
-	const gridLayout = isFullscreen
-		? "h-screen"
-		: showPreview
-		? "grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]"
-		: "flex flex-col h-[calc(100vh-200px)]";
+	
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col">
 			{/* Header */}
 			<div className="bg-white shadow-sm border-b border-gray-200">
 				<div className="container mx-auto px-6 py-4">
@@ -359,20 +357,7 @@ export default function QuestionPage() {
 							</div>
 						</div>
 						<div className="flex items-center space-x-2">
-							<button
-								onClick={() => setShowPreview(!showPreview)}
-								className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-								title={
-									showPreview
-										? "Hide Preview"
-										: "Show Preview"
-								}>
-								{showPreview ? (
-									<EyeOff className="w-5 h-5 text-gray-600" />
-								) : (
-									<Eye className="w-5 h-5 text-gray-600" />
-								)}
-							</button>
+							
 							<button
 								onClick={() => setIsFullscreen(!isFullscreen)}
 								className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -399,13 +384,12 @@ export default function QuestionPage() {
 			</div>
 
 			{/* Main Content */}
-			<div className={`container mx-auto px-6 py-6 ${editorLayout}`}>
-				<div className={gridLayout}>
+			<div
+				className={`container mx-auto px-6 py-6 flex-1 ${isFullscreen ? "fixed inset-0 z-50 bg-white" : ""}
+			`}>
+				
 					{/* Left Panel - Problem Description & Editor */}
-					<div
-						className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ${
-							!showPreview && !isFullscreen ? "col-span-2" : ""
-						}`}>
+					<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 						{!isFullscreen && (
 							<div className="p-6 border-b border-gray-200">
 								<h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -601,118 +585,10 @@ export default function QuestionPage() {
 								
 							</div>
 
-				<div
-					className="w-full"
-					style={{ minHeight: isFullscreen ? "500px" : "400px", height: isFullscreen ? "500px" : "400px" }}>
-					<Editor
-						height={isFullscreen ? "500px" : "400px"}
-						language={language}
-						value={code}
-						onChange={(value) => setCode(value || "")}
-						onMount={handleEditorDidMount}
-						theme={theme === "dark" ? "vs-dark" : "light"}
-									options={{
-										minimap: {
-											enabled: editorSettings.minimap,
-										},
-										fontSize: editorSettings.fontSize,
-										lineNumbers: editorSettings.lineNumbers
-											? "on"
-											: "off",
-										roundedSelection: false,
-										scrollBeyondLastLine: false,
-										automaticLayout: true,
-										padding: { top: 16, bottom: 16 },
-										fontFamily:
-											'Monaco, Menlo, "Ubuntu Mono", monospace',
-										wordWrap: editorSettings.wordWrap
-											? "on"
-											: "off",
-										tabSize: editorSettings.tabSize,
-										insertSpaces: true,
-										selectOnLineNumbers: true,
-										readOnly: false,
-										suggestOnTriggerCharacters:
-											editorSettings.autoComplete,
-										quickSuggestions:
-											editorSettings.autoComplete,
-										formatOnType:
-											editorSettings.formatOnType,
-										formatOnPaste:
-											editorSettings.formatOnPaste,
-										mouseWheelZoom: true,
-										smoothScrolling: true,
-										cursorBlinking: "smooth",
-										cursorSmoothCaretAnimation: "on",
-									}}
-								/>
-							</div>
-						</div>
+						
 					</div>
 
-					{/* Right Panel - Output */}
-					{showPreview && (
-						<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-							<div className="p-6 border-b border-gray-200">
-								<div className="flex items-center justify-between">
-									<h2 className="text-lg font-semibold text-gray-900">
-										Preview
-									</h2>
-									<div className="flex items-center space-x-2">
-										<div className="flex items-center bg-gray-100 rounded-lg p-1">
-											<button
-												onClick={() =>
-													setViewMode("desktop")
-												}
-												className={`p-2 rounded-md transition-colors ${
-													viewMode === "desktop"
-														? "bg-white shadow-sm"
-														: "hover:bg-gray-200"
-												}`}
-												title="Desktop View">
-												<Monitor className="w-4 h-4 text-gray-600" />
-											</button>
-											<button
-												onClick={() =>
-													setViewMode("tablet")
-												}
-												className={`p-2 rounded-md transition-colors ${
-													viewMode === "tablet"
-														? "bg-white shadow-sm"
-														: "hover:bg-gray-200"
-												}`}
-												title="Tablet View">
-												<Tablet className="w-4 h-4 text-gray-600" />
-											</button>
-											<button
-												onClick={() =>
-													setViewMode("mobile")
-												}
-												className={`p-2 rounded-md transition-colors ${
-													viewMode === "mobile"
-														? "bg-white shadow-sm"
-														: "hover:bg-gray-200"
-												}`}
-												title="Mobile View">
-												<Smartphone className="w-4 h-4 text-gray-600" />
-											</button>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<div className="flex-1 p-6 bg-gray-50 flex items-center justify-center overflow-auto">
-								<div
-									className={`bg-white rounded-lg shadow-sm border border-gray-200 transition-all duration-300 ${getViewModeWidth()}`}>
-									<iframe
-										ref={iframeRef}
-										className="w-full h-96 rounded-lg"
-										title="CSS Preview"
-									/>
-								</div>
-							</div>
-						</div>
-					)}
+					
 				</div>
 
 				{/* Enhanced Action Bar */}

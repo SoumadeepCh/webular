@@ -1,8 +1,13 @@
+'use client'
+
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { ModeToggle } from "@/components/ModeToggle";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
+  const { data: session } = useSession();
+
   return (
     <header className="bg-background shadow-sm border-b border-border">
       <div className="container mx-auto px-6 py-4">
@@ -15,7 +20,35 @@ export default function Header() {
               Webular
             </h1>
           </Link>
-          <ModeToggle />
+          <div className="flex items-center space-x-4">
+            {session ? (
+              <>
+                <Link href="/profile">
+                  <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                    Profile
+                  </button>
+                </Link>
+                <p>Welcome, {session.user.name}</p>
+                <button onClick={() => signOut()} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    Login
+                  </button>
+                </Link>
+                <Link href="/register">
+                  <button className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                    Register
+                  </button>
+                </Link>
+              </>
+            )}
+            <ModeToggle />
+          </div>
         </div>
       </div>
     </header>

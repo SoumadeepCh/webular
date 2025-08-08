@@ -1,0 +1,198 @@
+"use client";
+
+import { useState, FormEvent } from "react";
+import { signIn } from "next-auth/react";
+import { Eye, EyeOff, Mail, Lock, Users, ArrowRight } from "lucide-react";
+
+interface LoginFormData {
+	email: string;
+	password: string;
+}
+
+interface LoginPageProps {
+	callbackUrl?: string;
+}
+
+export default function LoginPage({ callbackUrl = "/" }: LoginPageProps) {
+	const [formData, setFormData] = useState<LoginFormData>({
+		email: "",
+		password: "",
+	});
+	const [showPassword, setShowPassword] = useState<boolean>(false);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [error, setError] = useState<string>("");
+
+	const handleInputChange =
+		(field: keyof LoginFormData) =>
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			setFormData((prev) => ({
+				...prev,
+				[field]: e.target.value,
+			}));
+			// Clear error when user starts typing
+			if (error) setError("");
+		};
+
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		setIsLoading(true);
+		setError("");
+
+		try {
+			const result = await signIn("credentials", {
+				email: formData.email,
+				password: formData.password,
+				callbackUrl,
+				redirect: false,
+			});
+
+			if (result?.error) {
+				setError("Invalid credentials. Please try again.");
+			} else if (result?.ok) {
+				window.location.href = callbackUrl;
+			}
+		} catch (err) {
+			setError("Something went wrong. Please try again.");
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const isFormValid =
+		formData.email.includes("@") && formData.password.length >= 6;
+
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+			<div className="max-w-md w-full">
+				{/* Header */}
+				<div className="text-center mb-8">
+					<div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-xl mb-4">
+						<Users className="w-8 h-8 text-white" />
+					</div>
+					<h1 className="text-3xl font-bold text-gray-900 mb-2">
+						Welcome Back
+					</h1>
+					<p className="text-gray-600">
+						Sign in to continue your interview practice
+					</p>
+				</div>
+
+				{/* Login Form */}
+				<div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+					<form onSubmit={handleSubmit} className="space-y-6">
+						{/* Email Field */}
+						<div>
+							<label
+								htmlFor="email"
+								className="block text-sm font-medium text-gray-700 mb-2">
+								Email Address
+							</label>
+							<div className="relative">
+								<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+									<Mail className="h-5 w-5 text-gray-400" />
+								</div>
+								<input
+									id="email"
+									type="email"
+									required
+									value={formData.email}
+									onChange={handleInputChange("email")}
+									className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+									placeholder="Enter your email"
+									disabled={isLoading}
+								/>
+							</div>
+						</div>
+
+						{/* Password Field */}
+						<div>
+							<label
+								htmlFor="password"
+								className="block text-sm font-medium text-gray-700 mb-2">
+								Password
+							</label>
+							<div className="relative">
+								<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+									<Lock className="h-5 w-5 text-gray-400" />
+								</div>
+								<input
+									id="password"
+									type={showPassword ? "text" : "password"}
+									required
+									value={formData.password}
+									onChange={handleInputChange("password")}
+									className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+									placeholder="Enter your password"
+									disabled={isLoading}
+								/>
+								<button
+									type="button"
+									onClick={() =>
+										setShowPassword(!showPassword)
+									}
+									className="absolute inset-y-0 right-0 pr-3 flex items-center"
+									disabled={isLoading}>
+									{showPassword ? (
+										<EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+									) : (
+										<Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+									)}
+								</button>
+							</div>
+						</div>
+
+						{/* Error Message */}
+						{error && (
+							<div className="bg-red-50 border border-red-200 rounded-lg p-3">
+								<p className="text-sm text-red-600">{error}</p>
+							</div>
+						)}
+
+						{/* Submit Button */}
+						<button
+							type="submit"
+							disabled={!isFormValid || isLoading}
+							className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+							{isLoading ? (
+								<>
+									<div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+									Signing in...
+								</>
+							) : (
+								<>
+									Sign In
+									<ArrowRight className="w-4 h-4" />
+								</>
+							)}
+						</button>
+					</form>
+
+					{/* Footer Links */}
+					<div className="mt-6 text-center space-y-2">
+						<button
+							type="button"
+							className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+							Forgot your password?
+						</button>
+						<p className="text-sm text-gray-600">
+							Don't have an account?{" "}
+							<button
+								type="button"
+								className="text-blue-600 hover:text-blue-700 font-medium">
+								Sign up here
+							</button>
+						</p>
+					</div>
+				</div>
+
+				{/* Additional Info */}
+				<div className="mt-8 text-center">
+					<p className="text-xs text-gray-500">
+						By signing in, you agree to our Terms of Service and
+						Privacy Policy
+					</p>
+				</div>
+			</div>
+		</div>
+	);
+}
