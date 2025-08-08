@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Eye, EyeOff, Mail, Lock, Users, ArrowRight } from "lucide-react";
 
@@ -9,11 +10,9 @@ interface LoginFormData {
 	password: string;
 }
 
-interface LoginPageProps {
-	callbackUrl?: string;
-}
-
-export default function LoginPage({ callbackUrl = "/" }: LoginPageProps) {
+export default function LoginPage() {
+	const searchParams = useSearchParams();
+	const callbackUrl = searchParams.get("callbackUrl") || "/";
 	const [formData, setFormData] = useState<LoginFormData>({
 		email: "",
 		password: "",

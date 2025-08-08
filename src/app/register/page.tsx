@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
 	Eye,
 	EyeOff,
@@ -31,7 +31,10 @@ interface PasswordRequirement {
 	met: boolean;
 }
 
-export default function RegisterPage({ callbackUrl = "/" }: RegisterPageProps) {
+export default function RegisterPage() {
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const callbackUrl = searchParams.get("callbackUrl") || "/";
 	const [formData, setFormData] = useState<RegisterFormData>({
 		name: "",
 		email: "",
@@ -44,7 +47,7 @@ export default function RegisterPage({ callbackUrl = "/" }: RegisterPageProps) {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string>("");
 	const [success, setSuccess] = useState<string>("");
-	const router = useRouter();
+
 
 	const handleInputChange =
 		(field: keyof RegisterFormData) =>
