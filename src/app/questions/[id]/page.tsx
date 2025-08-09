@@ -186,7 +186,7 @@ export default function QuestionPage() {
 			setIsAiLoading(true);
 			try {
 				const res = await fetch(
-					"http://localhost:5000/questions/api/analyze",
+					`${process.env.NEXT_PUBLIC_API_URL}/api/analyze`,
 					{
 						method: "POST",
 						headers: {
