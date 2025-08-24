@@ -2,10 +2,8 @@
 import { useState, useEffect } from "react";
 import {
 	Code,
-	Database,
 	Globe,
 	Layers,
-	Terminal,
 	BookOpen,
 	TrendingUp,
 	Users,
@@ -16,7 +14,6 @@ import {
 	Target,
 	Brain,
 	Coffee,
-	Clock,
 } from "lucide-react";
 
 // Mock components - replace with your actual imports
@@ -219,29 +216,7 @@ export default function Home() {
 			questionCount: 0,
 			color: "from-yellow-500 to-orange-500",
 			loading: true,
-		},
-		{
-			title: "SQL",
-			href: "/sql",
-			icon: Database,
-			description:
-				"Query and manipulate databases efficiently with SQL joins, aggregations, and optimization.",
-			difficulty: "Intermediate",
-			questionCount: 0,
-			color: "from-green-500 to-emerald-500",
-			loading: true,
-		},
-		{
-			title: "MongoDB",
-			href: "/mongodb",
-			icon: Terminal,
-			description:
-				"Work with NoSQL databases, document modeling, and MongoDB aggregation pipelines.",
-			difficulty: "Advanced",
-			questionCount: 0,
-			color: "from-purple-500 to-pink-500",
-			loading: true,
-		},
+		}
 	]);
 
 	useEffect(() => {

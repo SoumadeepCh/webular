@@ -1,6 +1,7 @@
 "use client";
 
-import ResizablePanelGroup from "@/components/ResizablePanelGroup";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import CodeEditor from "@/components/CodeEditor";
@@ -74,7 +75,7 @@ export default function QuestionPage() {
 	const [theme, setTheme] = useState<"light" | "dark">("dark");
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const [showSettings, setShowSettings] = useState(false);
-	 
+
 	const [editorSettings, setEditorSettings] = useState<EditorSettings>({
 		fontSize: 14,
 		tabSize: 2,
@@ -140,8 +141,6 @@ export default function QuestionPage() {
 		editorRef.current = editor;
 		setIsEditorReady(true);
 	};
-
-	
 
 	const runCode = useCallback(async () => {
 		setIsRunning(true);
@@ -252,7 +251,7 @@ export default function QuestionPage() {
 		a.href = url;
 		a.download = `${question?.title || "styles"}.css`;
 		document.body.appendChild(a);
-		a.click();
+a.click();
 		document.body.removeChild(a);
 		URL.revokeObjectURL(url);
 	};
@@ -319,8 +318,6 @@ export default function QuestionPage() {
 		);
 	}
 
-	
-
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col">
 			{/* Header */}
@@ -344,7 +341,8 @@ export default function QuestionPage() {
 											<span
 												className={`px-2 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(
 													question.difficulty
-												)}`}>
+												)}`}
+											>
 												{question.difficulty}
 											</span>
 										)}
@@ -357,7 +355,6 @@ export default function QuestionPage() {
 							</div>
 						</div>
 						<div className="flex items-center space-x-2">
-							
 							<button
 								onClick={() => setIsFullscreen(!isFullscreen)}
 								className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -365,7 +362,8 @@ export default function QuestionPage() {
 									isFullscreen
 										? "Exit Fullscreen"
 										: "Enter Fullscreen"
-								}>
+								}
+							>
 								{isFullscreen ? (
 									<Minimize className="w-5 h-5 text-gray-600" />
 								) : (
@@ -385,12 +383,14 @@ export default function QuestionPage() {
 
 			{/* Main Content */}
 			<div
-				className={`container mx-auto px-6 py-6 flex-1 ${isFullscreen ? "fixed inset-0 z-50 bg-white" : ""}
-			`}>
-				
-					{/* Left Panel - Problem Description & Editor */}
-					<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-						{!isFullscreen && (
+				className={`container mx-auto px-6 py-6 flex-1 ${
+					isFullscreen ? "fixed inset-0 z-50 bg-white" : ""
+				}`}
+			>
+				<div className="flex-1 flex flex-col">
+				<PanelGroup direction="horizontal">
+					<Panel defaultSize={50} minSize={20}>
+						<div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full">
 							<div className="p-6 border-b border-gray-200">
 								<h2 className="text-lg font-semibold text-gray-900 mb-4">
 									Problem Description
@@ -401,194 +401,270 @@ export default function QuestionPage() {
 									</p>
 								</div>
 							</div>
-						)}
+						</div>
+					</Panel>
+					<PanelResizeHandle className="resize-handle" />
+					<Panel defaultSize={50} minSize={20}>
+						<PanelGroup direction="vertical">
+							<Panel defaultSize={70} minSize={20}>
+								<div className="flex-1 flex flex-col h-full">
+									<div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+										<div className="flex items-center justify-between flex-wrap gap-2">
+											<div className="flex items-center space-x-4">
+												<h3 className="font-semibold text-gray-900">
+													{language.toUpperCase()}{" "}
+													Editor
+												</h3>
+												{errors.length > 0 && (
+													<span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+														{errors.length} error
+														{errors.length > 1
+															? "s"
+															: ""}
+													</span>
+												)}
+											</div>
+											<div className="flex items-center space-x-2 flex-wrap">
+												<button
+													onClick={() =>
+														changeFontSize(-1)
+													}
+													className="p-1 hover:bg-gray-200 rounded transition-colors"
+													title="Decrease Font Size"
+												>
+													<ZoomOut className="w-4 h-4 text-gray-600" />
+												</button>
+												<span className="text-xs text-gray-600 min-w-[2rem] text-center">
+													{editorSettings.fontSize}px
+												</span>
+												<button
+													onClick={() =>
+														changeFontSize(1)
+													}
+													className="p-1 hover:bg-gray-200 rounded transition-colors"
+													title="Increase Font Size"
+												>
+													<ZoomIn className="w-4 h-4 text-gray-600" />
+												</button>
+												<div className="w-px h-4 bg-gray-300 mx-2"></div>
+												<button
+													onClick={formatCode}
+													className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+													title="Format Code (Ctrl+Shift+F)"
+												>
+													Format
+												</button>
+												<button
+													onClick={copyCode}
+													className="p-1 hover:bg-gray-200 rounded transition-colors"
+													title="Copy Code"
+												>
+													<Copy className="w-4 h-4 text-gray-600" />
+												</button>
+												<button
+													onClick={downloadCode}
+													className="p-1 hover:bg-gray-200 rounded transition-colors"
+													title="Download CSS"
+												>
+													<Download className="w-4 h-4 text-gray-600" />
+												</button>
+												<label
+													className="p-1 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+													title="Upload CSS"
+												>
+													<Upload className="w-4 h-4 text-gray-600" />
+													<input
+														type="file"
+														accept=".css"
+														onChange={
+															handleFileUpload
+														}
+														className="hidden"
+													/>
+												</label>
+												<button
+													onClick={() =>
+														setShowSettings(
+															!showSettings
+														)
+													}
+													className="p-1 hover:bg-gray-200 rounded transition-colors"
+													title="Editor Settings"
+												>
+													<Settings className="w-4 h-4 text-gray-600" />
+												</button>
+												<button
+													onClick={() =>
+														setTheme(
+															theme === "light"
+																? "dark"
+																: "light"
+														)
+													}
+													className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+												>
+													{theme === "light"
+														? "Dark"
+														: "Light"}
+												</button>
+												<button
+													onClick={resetCode}
+													className="p-1 hover:bg-gray-200 rounded transition-colors"
+													title="Reset Code"
+												>
+													<RotateCcw className="w-4 h-4 text-gray-600" />
+												</button>
+											</div>
+										</div>
 
-						{/* Enhanced Code Editor */}
-						<div className="flex-1 flex flex-col">
-							<div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-								<div className="flex items-center justify-between flex-wrap gap-2">
-									<div className="flex items-center space-x-4">
-										<h3 className="font-semibold text-gray-900">
-											{language.toUpperCase()} Editor
-										</h3>
-										{errors.length > 0 && (
-											<span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
-												{errors.length} error
-												{errors.length > 1 ? "s" : ""}
-											</span>
+										{/* Settings Panel */}
+										{showSettings && (
+											<div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+												<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+													<label className="flex items-center space-x-2">
+														<input
+															type="checkbox"
+															checked={
+																editorSettings.wordWrap
+															}
+															onChange={(e) =>
+																updateSetting(
+																	"wordWrap",
+																	e.target
+																		.checked
+																)
+															}
+														/>
+														<span>Word Wrap</span>
+													</label>
+													<label className="flex items-center space-x-2">
+														<input
+															type="checkbox"
+															checked={
+																editorSettings.minimap
+															}
+															onChange={(e) =>
+																updateSetting(
+																	"minimap",
+																	e.target
+																		.checked
+																)
+															}
+														/>
+														<span>Minimap</span>
+													</label>
+													<label className="flex items-center space-x-2">
+														<input
+															type="checkbox"
+															checked={
+																editorSettings.lineNumbers
+															}
+															onChange={(e) =>
+																updateSetting(
+																	"lineNumbers",
+																	e.target
+																		.checked
+																)
+															}
+														/>
+														<span>
+															Line Numbers
+														</span>
+													</label>
+													<label className="flex items-center space-x-2">
+														<input
+															type="checkbox"
+															checked={
+																editorSettings.formatOnType
+															}
+															onChange={(e) =>
+																updateSetting(
+																	"formatOnType",
+																	e.target
+																		.checked
+																)
+															}
+														/>
+														<span>
+															Format on Type
+														</span>
+													</label>
+													<label className="flex items-center space-x-2">
+														<span>Tab Size:</span>
+														<select
+															value={
+																editorSettings.tabSize
+															}
+															onChange={(e) =>
+																updateSetting(
+																	"tabSize",
+																	parseInt(
+																		e
+																			.target
+																			.value
+																	)
+																)
+															}
+															className="border border-gray-300 rounded px-2 py-1"
+														>
+															<option value={2}>
+																2
+															</option>
+															<option value={4}>
+																4
+															</option>
+															<option value={8}>
+																8
+															</option>
+														</select>
+													</label>
+												</div>
+											</div>
 										)}
 									</div>
-									<div className="flex items-center space-x-2 flex-wrap">
-										<button
-											onClick={() => changeFontSize(-1)}
-											className="p-1 hover:bg-gray-200 rounded transition-colors"
-											title="Decrease Font Size">
-											<ZoomOut className="w-4 h-4 text-gray-600" />
-										</button>
-										<span className="text-xs text-gray-600 min-w-[2rem] text-center">
-											{editorSettings.fontSize}px
-										</span>
-										<button
-											onClick={() => changeFontSize(1)}
-											className="p-1 hover:bg-gray-200 rounded transition-colors"
-											title="Increase Font Size">
-											<ZoomIn className="w-4 h-4 text-gray-600" />
-										</button>
-										<div className="w-px h-4 bg-gray-300 mx-2"></div>
-										<button
-											onClick={formatCode}
-											className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-											title="Format Code (Ctrl+Shift+F)">
-											Format
-										</button>
-										<button
-											onClick={copyCode}
-											className="p-1 hover:bg-gray-200 rounded transition-colors"
-											title="Copy Code">
-											<Copy className="w-4 h-4 text-gray-600" />
-										</button>
-										<button
-											onClick={downloadCode}
-											className="p-1 hover:bg-gray-200 rounded transition-colors"
-											title="Download CSS">
-											<Download className="w-4 h-4 text-gray-600" />
-										</button>
-										<label
-											className="p-1 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-											title="Upload CSS">
-											<Upload className="w-4 h-4 text-gray-600" />
-											<input
-												type="file"
-												accept=".css"
-												onChange={handleFileUpload}
-												className="hidden"
+									<CodeEditor
+										code={code}
+										language={language}
+										theme={theme}
+										editorSettings={editorSettings}
+										onCodeChange={setCode}
+										onEditorMount={handleEditorDidMount}
+									/>
+								</div>
+							</Panel>
+							<PanelResizeHandle className="resize-handle" />
+							<Panel defaultSize={30} minSize={20}>
+								<div className="h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-auto">
+									<div className="p-6">
+										<h2 className="text-lg font-semibold text-gray-900 mb-4">
+											Output
+										</h2>
+										<div
+											className={`relative ${getViewModeWidth()} mx-auto border border-gray-300 rounded-lg overflow-hidden transition-all duration-300`}
+										>
+											<iframe
+												ref={iframeRef}
+												title="Preview"
+												className="w-full h-full"
+												sandbox="allow-scripts"
 											/>
-										</label>
-										<button
-											onClick={() =>
-												setShowSettings(!showSettings)
-											}
-											className="p-1 hover:bg-gray-200 rounded transition-colors"
-											title="Editor Settings">
-											<Settings className="w-4 h-4 text-gray-600" />
-										</button>
-										<button
-											onClick={() =>
-												setTheme(
-													theme === "light"
-														? "dark"
-														: "light"
-												)
-											}
-											className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors">
-											{theme === "light"
-												? "Dark"
-												: "Light"}
-										</button>
-										<button
-											onClick={resetCode}
-											className="p-1 hover:bg-gray-200 rounded transition-colors"
-											title="Reset Code">
-											<RotateCcw className="w-4 h-4 text-gray-600" />
-										</button>
+										</div>
+										{aiFeedback && (
+											<div className="mt-6">
+												<h3 className="text-lg font-semibold text-gray-900 mb-2">
+													AI Feedback
+												</h3>
+												<div className="prose prose-sm max-w-none text-gray-700">
+													{aiFeedback}
+												</div>
+											</div>
+										)}
 									</div>
 								</div>
-
-								{/* Settings Panel */}
-								{showSettings && (
-									<div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
-										<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-											<label className="flex items-center space-x-2">
-												<input
-													type="checkbox"
-													checked={
-														editorSettings.wordWrap
-													}
-													onChange={(e) =>
-														updateSetting(
-															"wordWrap",
-															e.target.checked
-														)
-													}
-												/>
-												<span>Word Wrap</span>
-											</label>
-											<label className="flex items-center space-x-2">
-												<input
-													type="checkbox"
-													checked={
-														editorSettings.minimap
-													}
-													onChange={(e) =>
-														updateSetting(
-															"minimap",
-															e.target.checked
-														)
-													}
-												/>
-												<span>Minimap</span>
-											</label>
-											<label className="flex items-center space-x-2">
-												<input
-													type="checkbox"
-													checked={
-														editorSettings.lineNumbers
-													}
-													onChange={(e) =>
-														updateSetting(
-															"lineNumbers",
-															e.target.checked
-														)
-													}
-												/>
-												<span>Line Numbers</span>
-											</label>
-											<label className="flex items-center space-x-2">
-												<input
-													type="checkbox"
-													checked={
-														editorSettings.formatOnType
-													}
-													onChange={(e) =>
-														updateSetting(
-															"formatOnType",
-															e.target.checked
-														)
-													}
-												/>
-												<span>Format on Type</span>
-											</label>
-											<label className="flex items-center space-x-2">
-												<span>Tab Size:</span>
-												<select
-													value={
-														editorSettings.tabSize
-													}
-													onChange={(e) =>
-														updateSetting(
-															"tabSize",
-															parseInt(
-																e.target.value
-															)
-														)
-													}
-													className="border border-gray-300 rounded px-2 py-1">
-													<option value={2}>2</option>
-													<option value={4}>4</option>
-													<option value={8}>8</option>
-												</select>
-											</label>
-										</div>
-									</div>
-								)}
-
-								
-							</div>
-
-						
-					</div>
-
-					
+							</Panel>
+						</PanelGroup>
+					</Panel>
+				</PanelGroup>
 				</div>
 
 				{/* Enhanced Action Bar */}
@@ -604,7 +680,8 @@ export default function QuestionPage() {
 											? "bg-gray-100 text-gray-400 cursor-not-allowed"
 											: "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl"
 									}`}
-									title="Run Code (Ctrl+Enter)">
+									title="Run Code (Ctrl+Enter)"
+								>
 									{isAiLoading ? (
 										<>
 											<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
@@ -628,7 +705,6 @@ export default function QuestionPage() {
 										Submit
 									</span>
 								</button>
-								
 							</div>
 
 							<div className="flex items-center space-x-4 text-sm text-gray-500">
@@ -641,7 +717,9 @@ export default function QuestionPage() {
 									<span>
 										{errors.length > 0
 											? `${errors.length} error${
-													errors.length > 1 ? "s" : ""
+													errors.length > 1
+														? "s"
+														: ""
 											  }`
 											: "No errors"}
 									</span>
@@ -651,15 +729,6 @@ export default function QuestionPage() {
 									<span>Auto-saved</span>
 								</div>
 							</div>
-						</div>
-					</div>
-				)}
-
-				{aiFeedback && (
-					<div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-						<h3 className="text-lg font-semibold text-gray-900 mb-2">AI Feedback</h3>
-						<div className="prose prose-sm max-w-none text-gray-700">
-							{aiFeedback}
 						</div>
 					</div>
 				)}
